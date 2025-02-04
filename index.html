@@ -35,7 +35,13 @@
             left: 10px;
             text-align: left;
         }
-
+        
+        #logMarker {
+        	position: absolute;
+            left: 10px;
+            top:300px;
+        }
+        
         #addPlayerContainer {
             top: 120px;
         }
@@ -43,7 +49,7 @@
         #csvContainer {
             top: 220px;
         }
-
+        
         #title {
             position: absolute;
             top: 10px;
@@ -97,13 +103,28 @@
         #log {
             position: absolute;
             top: 20px;
-            right: 20px;
+            right: 2%;
             width: 30%;
             max-height: 80vh;
             overflow-y: auto;
             text-align: left;
-            border-top: 1px solid white;
+            border-top: 1px solid rgb(128, 128, 128);
             padding-top: 10px;
+            background-color: #131313;
+        }
+        
+        
+        .answer-box2 {
+            width: 10%;
+            height: 150px;
+            position: absolute;
+            left: 68%;
+            top:83vh;
+            padding-top: 1vh;
+            padding-bottom: 1vh;
+            background: #1e1e1e;
+            text-align: center;
+            
         }
 
         .log-entry {
@@ -159,7 +180,7 @@
     <div id="timerContainer">
         ⏳ <span id="timer">--:--</span>
         <button class="btn" onclick="startTimer(180)">3 Min</button>
-        <button class="btn" onclick="startTimer(5)">5 Sec</button>
+        <button class="btn" onclick="startTimer(90)">1,5 min</button>
         <button class="btn" onclick="stopTimer()">🛑 Stop</button>
     </div>
 
@@ -172,20 +193,32 @@
     <div id="csvContainer">
         <label>CSV-Datei mit Fragen laden:</label><br>
         <input type="file" id="csvInput" accept=".csv" onchange="loadQuestions()"><br>
-        <button class="btn" onclick="addRedLineToLog()">Mark</button>
     </div>
-
+    
+    <div id="logMarker">
+    	<button class="btn" onclick="addRedLineToLog()">Mark</button>	
+    </div>
+    
     <div id="mainContent">
-        <h2 id="currentPlayer">---</h2>
 
         <div class="question-box">
             <h2>Frage:</h2>
+            <h2 id="currentPlayer">---</h2>
             <div id="questionBox">---</div>
         </div>
-
+        
         <div class="answer-box">
-            <h2>Antwort:</h2>
+            <h2>korrekte Antwort:</h2>
             <div id="answerBox">---</div>
+        </div>
+        
+        <div class="answer-box2">
+            <label>korrekte Antwort:</label>
+            <div id="answerBox2">---</div>
+            <button class="btn" onclick="markAnswer(true)">✅ Richtig</button>
+            <button class="btn" onclick="markAnswer(false)">❌ Falsch</button>
+            <h2>Antwort:</h2>
+
         </div>
 
         <div>
@@ -200,6 +233,7 @@
     <div id="log"></div>
 
     <button id="startGameButton" class="btn" onclick="startGame()">Spiel starten</button>
+                        
 
     <script>
         let players = [];
@@ -291,6 +325,7 @@
             let currentQ = questions[currentQuestion];
             document.getElementById("questionBox").innerText = currentQ.question;
             document.getElementById("answerBox").innerText = currentQ.answer;
+            document.getElementById("answerBox2").innerText = currentQ.answer;
             document.getElementById("currentPlayer").innerText = alivePlayers[currentPlayerIndex].name;
 
             let logBox = document.getElementById("log");
