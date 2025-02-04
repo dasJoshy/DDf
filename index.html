@@ -68,20 +68,21 @@
         }
 
         .question-box {
-            font-size: 16px;
+            font-size: 24px;
             font-weight: bold;
             text-align: center;
         }
 
         .answer-box {
+            color: rgb(133, 255, 133);
             margin-top: 10px;
-            font-size: 16px;
+            font-size: 20px;
             padding: 10px;
             background: #1e1e1e;
             display: inline-block;
-            border-radius: 5px;
+            border-radius: 10px;
             max-width: 33%;
-            width: 100%;
+            width: 15%;
             word-wrap: break-word;
             text-align: center;
         }
@@ -115,8 +116,11 @@
         
         
         .answer-box2 {
+            color: rgb(133, 255, 133);
             width: 10%;
-            height: 150px;
+            max-width: 20%;
+            height: 120px;
+            max-height: 150px;
             position: absolute;
             left: 68%;
             top:83vh;
@@ -124,6 +128,8 @@
             padding-bottom: 1vh;
             background: #1e1e1e;
             text-align: center;
+            word-wrap: break-word;
+            border-radius: 10px;
             
         }
 
@@ -202,23 +208,20 @@
     <div id="mainContent">
 
         <div class="question-box">
-            <h2>Frage:</h2>
+            <h2>Spieler:</h2>
             <h2 id="currentPlayer">---</h2>
             <div id="questionBox">---</div>
         </div>
         
         <div class="answer-box">
-            <h2>korrekte Antwort:</h2>
             <div id="answerBox">---</div>
         </div>
         
         <div class="answer-box2">
-            <label>korrekte Antwort:</label>
             <div id="answerBox2">---</div>
             <button class="btn" onclick="markAnswer(true)">✅ Richtig</button>
             <button class="btn" onclick="markAnswer(false)">❌ Falsch</button>
-            <h2>Antwort:</h2>
-
+            
         </div>
 
         <div>
@@ -227,7 +230,7 @@
         </div>
     </div>
 
-    <h2>Spieler:</h2>
+    <h2>Leben:</h2>
     <div id="players"></div>
 
     <div id="log"></div>
@@ -323,21 +326,23 @@
 
             if (currentQuestion >= questions.length) currentQuestion = 0;
             let currentQ = questions[currentQuestion];
-            document.getElementById("questionBox").innerText = currentQ.question;
+            let currentPlayer = alivePlayers[currentPlayerIndex];
+
+            // Frage im gewünschten Format anzeigen: "<Spieler X>: <Frage>"
+            document.getElementById("questionBox").innerText = `${currentPlayer.name}: ${currentQ.question}`;
             document.getElementById("answerBox").innerText = currentQ.answer;
             document.getElementById("answerBox2").innerText = currentQ.answer;
-            document.getElementById("currentPlayer").innerText = alivePlayers[currentPlayerIndex].name;
+            document.getElementById("currentPlayer").innerText = currentPlayer.name;
 
             let logBox = document.getElementById("log");
-            let playerName = alivePlayers[currentPlayerIndex].name;
-            let questionText = currentQ.question;
-            let logEntry = `<p class="log-entry"><strong>${playerName}:</strong> ${questionText}</p>`;
+            let logEntry = `<p class="log-entry"><strong>${currentPlayer.name}:</strong> ${currentQ.question}</p>`;
             logBox.innerHTML += logEntry;
             logBox.scrollTop = logBox.scrollHeight;
 
             currentQuestion++;
             currentPlayerIndex = (currentPlayerIndex + 1) % alivePlayers.length;
         }
+
 
         function markAnswer(correct) {
             if (!gameStarted) return;
