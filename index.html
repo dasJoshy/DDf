@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,6 +20,7 @@
             height: 100vh;
             position: relative;
         }
+
         #timerContainer {
             position: absolute;
             top: 60px;
@@ -26,17 +28,22 @@
             font-size: 20px;
             font-weight: bold;
         }
-        #addPlayerContainer, #csvContainer {
+
+        #addPlayerContainer,
+        #csvContainer {
             position: absolute;
             left: 10px;
             text-align: left;
         }
+
         #addPlayerContainer {
             top: 120px;
         }
+
         #csvContainer {
             top: 220px;
         }
+
         #title {
             position: absolute;
             top: 10px;
@@ -44,6 +51,7 @@
             font-size: 24px;
             font-weight: bold;
         }
+
         #mainContent {
             display: flex;
             flex-direction: column;
@@ -52,11 +60,13 @@
             margin-top: 20px;
             width: 100%;
         }
+
         .question-box {
             font-size: 16px;
             font-weight: bold;
             text-align: center;
         }
+
         .answer-box {
             margin-top: 10px;
             font-size: 16px;
@@ -69,6 +79,7 @@
             word-wrap: break-word;
             text-align: center;
         }
+
         .btn {
             margin: 10px;
             padding: 10px;
@@ -78,9 +89,11 @@
             border: none;
             border-radius: 5px;
         }
+
         .btn:hover {
             background-color: #555;
         }
+
         #log {
             position: absolute;
             top: 20px;
@@ -92,15 +105,23 @@
             border-top: 1px solid white;
             padding-top: 10px;
         }
+
         .log-entry {
             text-align: left;
             margin: 5px 0;
             font-size: 16px;
         }
+
         .red-line {
-            border-top: 2px solid red;
+            border-top: 3px solid rgb(255, 15, 15);
             margin: 10px 0;
         }
+
+        .green-line {
+            border-top: 3px solid rgb(0, 255, 0);
+            margin: 10px 0;
+        }
+
         .player {
             margin: 10px;
             padding: 10px;
@@ -110,15 +131,18 @@
             background-color: #1e1e1e;
             border-radius: 10px;
         }
+
         .hearts {
             color: red;
             font-size: 20px;
         }
+
         #currentPlayer {
             margin-top: 10px;
             font-size: 20px;
             font-weight: bold;
         }
+
         #players {
             display: flex;
             flex-wrap: wrap;
@@ -128,6 +152,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="title">Der Dümmste fliegt</div>
 
@@ -146,7 +171,8 @@
 
     <div id="csvContainer">
         <label>CSV-Datei mit Fragen laden:</label><br>
-        <input type="file" id="csvInput" accept=".csv" onchange="loadQuestions()">
+        <input type="file" id="csvInput" accept=".csv" onchange="loadQuestions()"><br>
+        <button class="btn" onclick="addRedLineToLog()">Mark</button>
     </div>
 
     <div id="mainContent">
@@ -182,7 +208,7 @@
         let currentPlayerIndex = 0;
         let timerInterval;
         let gameStarted = false;
-        
+
         function loadQuestions() {
             const fileInput = document.getElementById('csvInput');
             const file = fileInput.files[0];
@@ -192,7 +218,7 @@
             }
 
             const reader = new FileReader();
-            reader.onload = function(event) {
+            reader.onload = function (event) {
                 const text = event.target.result;
                 const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
                 questions = lines.map(line => {
@@ -254,8 +280,7 @@
 
         function nextQuestion() {
             if (!gameStarted) return;
-            
-            // Find the next player with lives greater than 0
+
             let alivePlayers = players.filter(player => player.lives > 0);
             if (alivePlayers.length === 0) {
                 alert("Keine Spieler mit Leben mehr! Spiel beendet.");
@@ -276,14 +301,14 @@
             logBox.scrollTop = logBox.scrollHeight;
 
             currentQuestion++;
-            currentPlayerIndex = (currentPlayerIndex + 1) % alivePlayers.length; // Rotate through alive players only
+            currentPlayerIndex = (currentPlayerIndex + 1) % alivePlayers.length;
         }
 
         function markAnswer(correct) {
             if (!gameStarted) return;
 
             let logBox = document.getElementById("log");
-            let resultText = correct ? "Richtig" : "Falsch";
+            let resultText = correct ? "✅ Richtig" : "❌ Falsch";
             let logEntry = `<p class="log-entry">${resultText}</p><p class="log-entry">---</p>`;
             logBox.innerHTML += logEntry;
             logBox.scrollTop = logBox.scrollHeight;
@@ -299,6 +324,7 @@
 
         function startTimer(seconds) {
             clearInterval(timerInterval);
+            addGreenLineToLog();
             let timeLeft = seconds;
             updateTimerDisplay(timeLeft);
 
@@ -325,9 +351,17 @@
         }
 
         function addRedLineToLog() {
-            document.getElementById("log").innerHTML += `<div class="red-line"></div>`;
-            document.getElementById("log").scrollTop = document.getElementById("log").scrollHeight;
+            const logBox = document.getElementById("log");
+            logBox.innerHTML += `<div class="red-line"></div>`;
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function addGreenLineToLog() {
+            const logBox = document.getElementById("log");
+            logBox.innerHTML += `<div class="green-line"></div>`;
+            logBox.scrollTop = logBox.scrollHeight;
         }
     </script>
 </body>
+
 </html>
