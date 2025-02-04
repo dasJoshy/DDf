@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Der Dümmste fliegt</title>
+    <style>
+        /* Dark Mode Styles */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #121212;
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+        }
+        #timerContainer {
+            position: absolute;
+            top: 60px;
+            left: 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        #addPlayerContainer, #csvContainer {
+            position: absolute;
+            left: 10px;
+            text-align: left;
+        }
+        #addPlayerContainer {
+            top: 120px;
+        }
+        #csvContainer {
+            top: 220px;
+        }
+        #title {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        #mainContent {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            margin-top: 20px;
+            width: 100%;
+        }
+        .question-box {
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .answer-box {
+            margin-top: 10px;
+            font-size: 16px;
+            padding: 10px;
+            background: #1e1e1e;
+            display: inline-block;
+            border-radius: 5px;
+            max-width: 33%;
+            width: 100%;
+            word-wrap: break-word;
+            text-align: center;
+        }
+        .btn {
+            margin: 10px;
+            padding: 10px;
+            cursor: pointer;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        .btn:hover {
+            background-color: #555;
+        }
+        #log {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 30%;
+            max-height: 80vh;
+            overflow-y: auto;
+            text-align: left;
+            border-top: 1px solid white;
+            padding-top: 10px;
+        }
+        .log-entry {
+            text-align: left;
+            margin: 5px 0;
+            font-size: 16px;
+        }
+        .red-line {
+            border-top: 2px solid red;
+            margin: 10px 0;
+        }
+        .player {
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #ffffff;
+            display: inline-block;
+            width: 150px;
+            background-color: #1e1e1e;
+            border-radius: 10px;
+        }
+        .hearts {
+            color: red;
+            font-size: 20px;
+        }
+        #currentPlayer {
+            margin-top: 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        #players {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 600px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="title">Der Dümmste fliegt</div>
+
+    <div id="timerContainer">
+        ⏳ <span id="timer">--:--</span>
+        <button class="btn" onclick="startTimer(180)">3 Min</button>
+        <button class="btn" onclick="startTimer(5)">5 Sec</button>
+        <button class="btn" onclick="stopTimer()">🛑 Stop</button>
+    </div>
+
+    <div id="addPlayerContainer">
+        <label>Neuen Spieler hinzufügen:</label><br>
+        <input type="text" id="newPlayerName" placeholder="Spielername">
+        <button class="btn" onclick="addPlayer()">Hinzufügen</button>
+    </div>
+
+    <div id="csvContainer">
+        <label>CSV-Datei mit Fragen laden:</label><br>
+        <input type="file" id="csvInput" accept=".csv" onchange="loadQuestions()">
+    </div>
+
+    <div id="mainContent">
+        <h2 id="currentPlayer">---</h2>
+
+        <div class="question-box">
+            <h2>Frage:</h2>
+            <div id="questionBox">---</div>
+        </div>
+
+        <div class="answer-box">
+            <h2>Antwort:</h2>
+            <div id="answerBox">---</div>
+        </div>
+
+        <div>
+            <button class="btn" onclick="markAnswer(true)">✅ Richtig</button>
+            <button class="btn" onclick="markAnswer(false)">❌ Falsch</button>
+        </div>
+    </div>
+
+    <h2>Spieler:</h2>
+    <div id="players"></div>
+
+    <div id="log"></div>
+
+    <button id="startGameButton" class="btn" onclick="startGame()">Spiel starten</button>
+
+    <script>
+        let players = [];
+        let questions = [];
+        let currentQuestion = 0;
+        let currentPlayerIndex = 0;
+        let timerInterval;
+        let gameStarted = false;
+        
+        function loadQuestions() {
+            const fileInput = document.getElementById('csvInput');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert("Bitte wähle eine CSV-Datei aus.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const text = event.target.result;
+                const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
+                questions = lines.map(line => {
+                    const [question, answer] = line.split(',');
+                    if (question && answer) {
+                        return { question: question.trim(), answer: answer.trim() };
+                    } else {
+                        return null;
+                    }
+                }).filter(Boolean);
+                if (questions.length === 0) {
+                    alert("Die CSV-Datei enthält keine gültigen Fragen.");
+                } else {
+                    console.log('Fragen geladen:', questions);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function addPlayer() {
+            let name = document.getElementById("newPlayerName").value.trim();
+            if (name) {
+                players.push({ name: name, lives: 3 });
+                document.getElementById("newPlayerName").value = "";
+                renderPlayers();
+            }
+        }
+
+        function renderPlayers() {
+            let container = document.getElementById("players");
+            container.innerHTML = "";
+            players.forEach((player, index) => {
+                if (player.lives > 0) {
+                    container.innerHTML += `
+                        <div class="player">
+                            ${player.name} <br>
+                            <span class="hearts">${"❤️".repeat(player.lives)}</span> <br>
+                            <button class="btn" onclick="changeLife(${index}, -1)">➖</button>
+                            <button class="btn" onclick="changeLife(${index}, 1)">➕</button>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        function startGame() {
+            if (players.length === 0) {
+                alert("Bitte füge mindestens einen Spieler hinzu!");
+                return;
+            }
+            if (questions.length === 0) {
+                alert("Bitte lade zuerst Fragen von einer CSV-Datei hoch!");
+                return;
+            }
+            gameStarted = true;
+            document.getElementById("startGameButton").style.display = "none";
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            if (!gameStarted) return;
+            
+            // Find the next player with lives greater than 0
+            let alivePlayers = players.filter(player => player.lives > 0);
+            if (alivePlayers.length === 0) {
+                alert("Keine Spieler mit Leben mehr! Spiel beendet.");
+                return;
+            }
+
+            if (currentQuestion >= questions.length) currentQuestion = 0;
+            let currentQ = questions[currentQuestion];
+            document.getElementById("questionBox").innerText = currentQ.question;
+            document.getElementById("answerBox").innerText = currentQ.answer;
+            document.getElementById("currentPlayer").innerText = alivePlayers[currentPlayerIndex].name;
+
+            let logBox = document.getElementById("log");
+            let playerName = alivePlayers[currentPlayerIndex].name;
+            let questionText = currentQ.question;
+            let logEntry = `<p class="log-entry"><strong>${playerName}:</strong> ${questionText}</p>`;
+            logBox.innerHTML += logEntry;
+            logBox.scrollTop = logBox.scrollHeight;
+
+            currentQuestion++;
+            currentPlayerIndex = (currentPlayerIndex + 1) % alivePlayers.length; // Rotate through alive players only
+        }
+
+        function markAnswer(correct) {
+            if (!gameStarted) return;
+
+            let logBox = document.getElementById("log");
+            let resultText = correct ? "Richtig" : "Falsch";
+            let logEntry = `<p class="log-entry">${resultText}</p><p class="log-entry">---</p>`;
+            logBox.innerHTML += logEntry;
+            logBox.scrollTop = logBox.scrollHeight;
+
+            nextQuestion();
+        }
+
+        function changeLife(playerIndex, amount) {
+            players[playerIndex].lives += amount;
+            if (players[playerIndex].lives < 0) players[playerIndex].lives = 0;
+            renderPlayers();
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            let timeLeft = seconds;
+            updateTimerDisplay(timeLeft);
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay(timeLeft);
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    addRedLineToLog();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            document.getElementById("timer").innerText = "--:--";
+        }
+
+        function updateTimerDisplay(seconds) {
+            let minutes = Math.floor(seconds / 60);
+            let secs = seconds % 60;
+            document.getElementById("timer").innerText = `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+        }
+
+        function addRedLineToLog() {
+            document.getElementById("log").innerHTML += `<div class="red-line"></div>`;
+            document.getElementById("log").scrollTop = document.getElementById("log").scrollHeight;
+        }
+    </script>
+</body>
+</html>
