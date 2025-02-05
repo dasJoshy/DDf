@@ -252,7 +252,7 @@
         let currentPlayerIndex = 0;
         let timerInterval;
         let gameStarted = false;
-
+        
         function loadQuestions() {
             const fileInput = document.getElementById('csvInput');
             const file = fileInput.files[0];
@@ -262,13 +262,13 @@
             }
 
             const reader = new FileReader();
-            reader.onload = function (event) {
-                const text = event.target.result;
+            reader.onload = function(event) {
+                const text = event.target.result; // Sollte UTF-8 kodiertes CSV einlesen
                 const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
                 questions = lines.map(line => {
                     const [question, answer] = line.split(',');
                     if (question && answer) {
-                        return { question: question.trim(), answer: answer.trim() };
+                        return { question: question.trim(), answer: answer.trim() }; 
                     } else {
                         return null;
                     }
@@ -279,7 +279,7 @@
                     console.log('Fragen geladen:', questions);
                 }
             };
-            reader.readAsText(file);
+            reader.readAsText(file, 'UTF-8'); // Ensures that text is read as UTF-8
         }
 
         function addPlayer() {
