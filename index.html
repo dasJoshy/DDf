@@ -35,13 +35,13 @@
             left: 10px;
             text-align: left;
         }
-        
+
         #logMarker {
-        	position: absolute;
+            position: absolute;
             left: 10px;
-            top:300px;
+            top: 300px;
         }
-        
+
         #addPlayerContainer {
             top: 120px;
         }
@@ -49,7 +49,7 @@
         #csvContainer {
             top: 220px;
         }
-        
+
         #title {
             position: absolute;
             top: 10px;
@@ -113,31 +113,12 @@
             top: 20px;
             right: 2%;
             width: 30%;
-            max-height: 80vh;
+            max-height: 95%;
             overflow-y: auto;
             text-align: left;
             border-top: 1px solid rgb(128, 128, 128);
             padding-top: 10px;
             background-color: #131313;
-        }
-        
-        
-        .answer-box2 {
-            color: rgb(133, 255, 133);
-            width: 10%;
-            max-width: 20%;
-            height: 90px;
-            max-height: 150px;
-            position: absolute;
-            left: 68%;
-            top:83vh;
-            padding-top: 1vh;
-            padding-bottom: 1vh;
-            background: #1e1e1e;
-            text-align: center;
-            word-wrap: break-word;
-            border-radius: 10px;
-            
         }
 
         .log-entry {
@@ -152,7 +133,7 @@
         }
 
         .green-line {
-            border-top: 3px solid rgb(0, 255, 0);
+            border-top: 3px solid green;
             margin: 10px 0;
         }
 
@@ -207,28 +188,20 @@
         <label>CSV-Datei mit Fragen laden:</label><br>
         <input type="file" id="csvInput" accept=".csv" onchange="loadQuestions()"><br>
     </div>
-    
-    <div id="logMarker">
-    	<button class="btn" onclick="addRedLineToLog()">Mark</button>	
-    </div>
-    
-    <div id="mainContent">
 
+    <div id="logMarker">
+        <button class="btn" onclick="addRedLineToLog()">Mark</button>
+    </div>
+
+    <div id="mainContent">
         <div class="question-box">
             <h2>Spieler:</h2>
             <h2 id="currentPlayer">---</h2>
             <div id="questionBox">---</div>
         </div>
-        
+
         <div class="answer-box">
             <div id="answerBox">---</div>
-        </div>
-        
-        <div class="answer-box2">
-            <div id="answerBox2">---</div>
-            <button class="btn" onclick="markAnswer(true)">✅ Richtig</button>
-            <button class="btn" onclick="markAnswer(false)">❌ Falsch</button>
-            
         </div>
 
         <div>
@@ -243,7 +216,6 @@
     <div id="log"></div>
 
     <button id="startGameButton" class="btn" onclick="startGame()">Spiel starten</button>
-                        
 
     <script>
         let players = [];
@@ -252,7 +224,7 @@
         let currentPlayerIndex = 0;
         let timerInterval;
         let gameStarted = false;
-        
+
         function loadQuestions() {
             const fileInput = document.getElementById('csvInput');
             const file = fileInput.files[0];
@@ -262,13 +234,15 @@
             }
 
             const reader = new FileReader();
-            reader.onload = function(event) {
-                const text = event.target.result; // Sollte UTF-8 kodiertes CSV einlesen
+            reader.onload = function (event) {
+                const text = event.target.result;
                 const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
                 questions = lines.map(line => {
-                    const [question, answer] = line.split(',');
-                    if (question && answer) {
-                        return { question: question.trim(), answer: answer.trim() }; 
+                    const parts = line.split(',', 2);
+                    if (parts.length === 2) {
+                        const question = parts[0].trim();
+                        const answer = parts[1].trim();
+                        return { question, answer };
                     } else {
                         return null;
                     }
@@ -279,7 +253,7 @@
                     console.log('Fragen geladen:', questions);
                 }
             };
-            reader.readAsText(file, 'UTF-8'); // Ensures that text is read as UTF-8
+            reader.readAsText(file, 'UTF-8');
         }
 
         function addPlayer() {
@@ -335,10 +309,8 @@
             let currentQ = questions[currentQuestion];
             let currentPlayer = alivePlayers[currentPlayerIndex];
 
-            // Frage im gewünschten Format anzeigen: "<Spieler X>: <Frage>"
             document.getElementById("questionBox").innerText = `${currentPlayer.name}: ${currentQ.question}`;
             document.getElementById("answerBox").innerText = currentQ.answer;
-            document.getElementById("answerBox2").innerText = currentQ.answer;
             document.getElementById("currentPlayer").innerText = currentPlayer.name;
 
             let logBox = document.getElementById("log");
