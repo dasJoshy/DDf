@@ -3,732 +3,706 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Der Dümmste fliegt – UI Prototype Suite</title>
+    <title>Der Dümmste fliegt</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --accent:#38bdf8;--success:#4ade80;--danger:#f87171;--muted:#64748b;
+            --lime:#a3e635;--coral:#fb7185;
+            --bg:#08090e;--surface:rgba(255,255,255,0.04);--surface-h:rgba(255,255,255,0.07);
+            --border:rgba(255,255,255,0.08);--border-s:rgba(255,255,255,0.04);
+            --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+            --font:'Plus Jakarta Sans',-apple-system,sans-serif;--mono:'Space Mono',monospace;
+            --r:14px;--rs:8px;--blur:24px
         }
+        body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
 
-        :root {
-            --primary: #6366f1;
-            --success: #22c55e;
-            --danger: #ef4444;
-            --accent-lime: #84cc16;
-            --accent-sky: #0ea5e9;
-            --accent-coral: #ff6b6b;
-            --dark-bg: #0f172a;
-            --dark-card: #1e293b;
-            --dark-border: #334155;
-            --light-text: #f1f5f9;
-            --dim-text: #cbd5e1;
-        }
+        /* ── Glass ── */
+        .g{background:var(--surface);backdrop-filter:blur(var(--blur));-webkit-backdrop-filter:blur(var(--blur));border:1px solid var(--border);border-radius:var(--r)}
 
-        html {
-            scroll-behavior: smooth;
-        }
+        /* ── Buttons ── */
+        .btn{padding:9px 16px;border:none;border-radius:var(--rs);font-weight:600;font-size:13px;cursor:pointer;font-family:var(--font);transition:filter .15s,transform .1s;display:inline-flex;align-items:center;gap:6px}
+        .btn:active{transform:translateY(1px)}
+        .btn svg{width:14px;height:14px;flex-shrink:0}
+        .btn-a{background:var(--accent);color:#0a1628}.btn-a:hover{filter:brightness(1.1)}
+        .btn-s{background:var(--success);color:#052e16}.btn-s:hover{filter:brightness(1.1)}
+        .btn-d{background:var(--danger);color:#450a0a}.btn-d:hover{filter:brightness(1.1)}
+        .btn-m{background:var(--surface-h);color:var(--text2);border:1px solid var(--border)}.btn-m:hover{color:var(--text)}
+        .btn-g{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-g:hover{background:var(--surface);color:var(--text)}
 
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1a1f35 100%);
-            color: var(--light-text);
-            line-height: 1.6;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
+        .kbd{display:inline-block;padding:1px 5px;font-size:10px;font-family:var(--mono);color:var(--text3);background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:4px;margin-left:6px}
+        .label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:6px}
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 60px 20px;
-        }
+        /* ── Overlay ── */
+        .overlay{display:none;position:fixed;inset:0;background:rgba(8,9,14,.92);backdrop-filter:blur(16px);z-index:100;align-items:center;justify-content:center}
+        .overlay.on{display:flex}
+        .overlay-box{max-width:460px;width:92%;padding:32px;display:flex;flex-direction:column;gap:20px}
 
-        /* Header */
-        .header {
-            text-align: center;
-            margin-bottom: 80px;
-            animation: slideInDown 0.8s ease;
-        }
+        /* ── Toast ── */
+        .toast{position:fixed;bottom:20px;right:20px;background:var(--surface-h);backdrop-filter:blur(20px);border:1px solid var(--border);color:var(--text);padding:10px 18px;border-radius:var(--rs);font-size:13px;font-weight:600;z-index:200;opacity:0;transform:translateY(8px);animation:fadeUp .2s ease forwards}
+        @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
 
-        @keyframes slideInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+        /* ── Life heart SVG ── */
+        .life{width:14px;height:14px;color:var(--danger);transition:opacity .2s}.life.x{opacity:.15}
 
-        .header h1 {
-            font-size: 56px;
-            font-weight: 800;
-            margin-bottom: 16px;
-            background: linear-gradient(90deg, var(--accent-lime), var(--accent-sky), var(--accent-coral));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1.2;
-        }
+        /* ── Spinner ── */
+        .spin{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--text2);border-radius:50%;animation:sp .8s linear infinite}
+        @keyframes sp{to{transform:rotate(360deg)}}
 
-        .header p {
-            font-size: 20px;
-            color: var(--dim-text);
-            margin-bottom: 8px;
-        }
+        /* ════════════════ ROLE SELECT ════════════════ */
+        #roleSelect{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+        #roleSelect .pick{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:600px;width:100%}
+        #roleSelect h1{grid-column:1/-1;text-align:center;font-size:32px;font-weight:800;color:var(--lime);margin-bottom:8px;letter-spacing:-.5px}
+        #roleSelect p{grid-column:1/-1;text-align:center;color:var(--text3);font-size:13px;margin-bottom:16px}
+        .role-btn{padding:40px 24px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);cursor:pointer;text-align:center;transition:border-color .2s,background .2s}
+        .role-btn:hover{border-color:rgba(255,255,255,.15);background:var(--surface-h)}
+        .role-btn svg{width:32px;height:32px;margin-bottom:12px;color:var(--text2)}
+        .role-btn h2{font-size:18px;font-weight:700;margin-bottom:4px}
+        .role-btn small{font-size:12px;color:var(--text3)}
 
-        .header small {
-            font-size: 14px;
-            color: var(--accent-sky);
-            font-weight: 600;
-        }
+        /* ════════════════ LOBBY ════════════════ */
+        #lobby{display:none;padding:24px}
+        #lobby.on{display:block}
+        .lobby-wrap{max-width:640px;margin:0 auto}
+        .lobby-wrap h1{font-size:28px;font-weight:800;color:var(--lime);text-align:center;margin-bottom:4px}
+        .lobby-sub{text-align:center;color:var(--text3);font-size:13px;margin-bottom:32px}
+        .lobby-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+        .lobby-card{padding:20px}
+        .lobby-card h3{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+        .lobby-card h3 svg{width:15px;height:15px;opacity:.5}
+        .link-box{background:rgba(0,0,0,.3);border:1px solid var(--border-s);border-radius:6px;padding:8px 10px;font-family:var(--mono);font-size:10px;color:var(--text3);word-break:break-all;margin-bottom:8px}
+        .joined-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(255,255,255,.02);border:1px solid var(--border-s);border-radius:var(--rs);font-size:13px;font-weight:600}
+        .avatar{width:28px;height:28px;border-radius:7px;background:var(--surface-h);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text3)}
+        .start-sec{grid-column:1/-1;margin-top:8px}
 
-        .tagline {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            margin-top: 24px;
-            flex-wrap: wrap;
-        }
+        /* ════════════════ JOIN (Player) ════════════════ */
+        #joinScreen .join-box{max-width:360px;width:92%;padding:32px;display:flex;flex-direction:column;gap:20px}
+        #joinScreen input{padding:10px 14px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--rs);color:var(--text);font-family:var(--font);font-size:14px}
+        #joinScreen input:focus{outline:none;border-color:rgba(56,189,248,.3)}
 
-        .tag {
-            background: rgba(132, 204, 22, 0.1);
-            border: 1px solid var(--accent-lime);
-            color: var(--accent-lime);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+        /* ════════════════ HOST VIEW ════════════════ */
+        #hostView{display:none;height:100vh;flex-direction:column}
+        #hostView.on{display:flex}
+        .h-head{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--border-s)}
+        .h-title{font-size:20px;font-weight:800;color:var(--lime)}
+        .h-badges{display:flex;gap:8px;align-items:center}
+        .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:var(--surface);border:1px solid var(--border-s);border-radius:5px;font-size:11px;font-weight:600;color:var(--text2);font-family:var(--mono)}
+        .badge b{color:var(--text)}
+        .badge-live{color:var(--coral)}
+        .badge-live::before{content:'';width:6px;height:6px;background:var(--coral);border-radius:50%;animation:pulse 2s ease-in-out infinite}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+        .h-body{display:grid;grid-template-columns:1fr 340px;gap:16px;flex:1;padding:16px 20px;overflow:hidden}
+        .h-main{display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+        .h-card{padding:18px}
+        .h-card-content{font-size:20px;font-weight:700;line-height:1.4}
+        .q-card{border-color:rgba(163,230,53,.2);min-height:80px;display:flex;flex-direction:column;justify-content:center}
+        .a-card{border-style:dashed;border-color:rgba(74,222,128,.25)}
+        .a-label{color:var(--success)}
+        .actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+        .btn-act{padding:13px 16px;font-size:14px;font-weight:700;border-radius:var(--rs);border:none;cursor:pointer;font-family:var(--font);transition:filter .15s,transform .1s;display:flex;align-items:center;justify-content:center;gap:7px}
+        .btn-act:hover{filter:brightness(1.12)}
+        .btn-act:active{transform:translateY(2px)}
+        .btn-act svg{width:15px;height:15px}
+        .bc{background:var(--success);color:#052e16}.bw{background:var(--danger);color:#450a0a}.bs{background:var(--muted);color:#f1f5f9}
 
-        /* Assets Grid */
-        .assets-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-bottom: 60px;
-        }
+        /* Sidebar */
+        .sidebar{display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+        .panel{padding:14px}
+        .p-head{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border-s);display:flex;align-items:center;gap:6px}
+        .p-head svg{width:13px;height:13px;opacity:.5}
+        .p-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:13px}
+        .p-row+.p-row{border-top:1px solid var(--border-s)}
+        .p-row.elim{opacity:.35}
+        .p-name{font-weight:600;flex:1}
+        .p-lives{display:flex;gap:2px;margin:0 10px}
+        .p-ctrl{display:flex;gap:3px}
+        .btn-l{padding:2px 7px;font-size:12px;font-weight:600;background:var(--surface-h);border:1px solid var(--border);color:var(--text2);border-radius:4px;cursor:pointer;font-family:var(--mono);transition:color .15s}
+        .btn-l:hover{color:var(--text)}
+        .log-wrap{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:1px;max-height:380px}
+        .log-e{font-family:var(--mono);font-size:10px;color:var(--text2);padding:5px 7px;border-radius:3px;line-height:1.5}
+        .log-e:nth-child(odd){background:rgba(255,255,255,.02)}
+        .pill{display:inline-block;padding:1px 5px;border-radius:3px;font-weight:700;font-size:9px;margin-left:3px}
+        .pill-ok{background:rgba(74,222,128,.15);color:var(--success)}
+        .pill-no{background:rgba(248,113,113,.15);color:var(--danger)}
+        .pill-sk{background:rgba(148,163,184,.1);color:var(--text3)}
 
-        .asset-card {
-            background: var(--dark-card);
-            border: 1px solid var(--dark-border);
-            border-radius: 12px;
-            padding: 28px;
-            transition: all 0.3s ease;
-            animation: slideInUp 0.6s ease;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
+        /* ════════════════ PLAYER VIEW ════════════════ */
+        #playerView{display:none;max-width:390px;margin:0 auto;padding:16px}
+        #playerView.on{display:block}
+        .pv-head{padding:12px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+        .pv-room{font-family:var(--mono);font-size:14px;font-weight:700}
+        .pv-status{font-size:12px;color:var(--text3)}
+        .pv-question{border:1px solid rgba(163,230,53,.15);padding:24px 18px;text-align:center;min-height:160px;display:flex;flex-direction:column;justify-content:center;gap:12px;margin-bottom:12px}
+        .pv-q{font-size:18px;font-weight:700;line-height:1.5}
+        .pv-hint{font-size:12px;color:var(--text3);display:flex;align-items:center;justify-content:center;gap:5px}
+        .pv-hint svg{width:13px;height:13px}
+        .pv-wait{text-align:center;padding:14px;color:var(--text3);font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px}
+        .pv-dash{padding:14px;margin-bottom:12px}
+        .pv-dash-t{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:10px}
+        .pv-item{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:var(--rs);font-size:13px;border:1px solid transparent}
+        .pv-item+.pv-item{margin-top:4px}
+        .pv-item.me{background:rgba(163,230,53,.06);border-color:rgba(163,230,53,.12)}
+        .pv-item.out{opacity:.35}
 
-        .asset-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-8px);
-            box-shadow: 0 12px 24px rgba(99, 102, 241, 0.2);
-        }
+        /* ── Vote cards ── */
+        .vc{padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);font-weight:600;font-size:14px;font-family:var(--font);cursor:pointer;transition:background .15s,border-color .15s,transform .1s;text-align:center;color:var(--text)}
+        .vc:hover{background:var(--surface-h);border-color:rgba(255,255,255,.12)}
+        .vc.sel{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.3);transform:scale(1.01)}
+        .vc.dis{opacity:.25;cursor:not-allowed}
 
-        .asset-icon {
-            font-size: 40px;
-            margin-bottom: 16px;
-        }
+        /* ════════════════ FRAGEN-TABELLE ════════════════ */
+        #fragenView{display:none;padding:24px}
+        #fragenView.on{display:block}
+        .fragen-wrap{max-width:900px;margin:0 auto}
+        .fragen-wrap h1{font-size:24px;font-weight:800;color:var(--lime);margin-bottom:4px}
+        .fragen-sub{color:var(--text3);font-size:13px;margin-bottom:20px}
+        .q-table{width:100%;border-collapse:collapse;font-size:13px}
+        .q-table th{text-align:left;padding:8px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text3);border-bottom:1px solid var(--border)}
+        .q-table td{padding:8px 12px;border-bottom:1px solid var(--border-s);vertical-align:top}
+        .q-table tr:hover td{background:rgba(255,255,255,.02)}
+        .q-table .nr{color:var(--text3);font-family:var(--mono);font-size:11px;width:40px}
+        .q-table .kat{font-size:11px;color:var(--text3);font-weight:600}
+        .q-table .ans{color:var(--success);font-weight:600}
 
-        .asset-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: var(--light-text);
-        }
+        /* ── Nav bar ── */
+        .nav{display:flex;gap:2px;justify-content:center;background:var(--surface);border-radius:10px;padding:3px;width:fit-content;margin:16px auto;border:1px solid var(--border-s)}
+        .nav-btn{padding:7px 16px;border:none;background:transparent;color:var(--text2);border-radius:7px;cursor:pointer;font-weight:600;font-size:12px;font-family:var(--font);transition:background .2s,color .2s;display:flex;align-items:center;gap:6px}
+        .nav-btn.on{background:rgba(255,255,255,.1);color:var(--text)}
+        .nav-btn:hover:not(.on){color:var(--text)}
+        .nav-btn svg{width:14px;height:14px}
 
-        .asset-description {
-            font-size: 13px;
-            color: var(--dim-text);
-            margin-bottom: 16px;
-            flex: 1;
-            line-height: 1.5;
-        }
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px}
 
-        .asset-features {
-            list-style: none;
-            margin-bottom: 20px;
-            font-size: 12px;
-        }
-
-        .asset-features li {
-            padding: 4px 0;
-            color: var(--dim-text);
-            padding-left: 20px;
-            position: relative;
-        }
-
-        .asset-features li::before {
-            content: '✓';
-            position: absolute;
-            left: 0;
-            color: var(--success);
-            font-weight: 700;
-        }
-
-        .asset-link {
-            display: inline-block;
-            padding: 10px 16px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 13px;
-            text-decoration: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            margin-top: auto;
-        }
-
-        .asset-link:hover {
-            background: #5558e3;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
-        }
-
-        .asset-link.secondary {
-            background: transparent;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-        }
-
-        .asset-link.secondary:hover {
-            background: rgba(99, 102, 241, 0.1);
-        }
-
-        /* Quick Stats */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 16px;
-            margin-bottom: 60px;
-            background: var(--dark-card);
-            border: 1px solid var(--dark-border);
-            border-radius: 12px;
-            padding: 24px;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 32px;
-            font-weight: 800;
-            color: var(--accent-lime);
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: var(--dim-text);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-
-        /* FAQ Section */
-        .faq-section {
-            margin-bottom: 60px;
-        }
-
-        .section-title {
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 32px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid var(--accent-lime);
-            display: inline-block;
-        }
-
-        .faq-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
-        }
-
-        .faq-item {
-            background: var(--dark-card);
-            border: 1px solid var(--dark-border);
-            border-radius: 12px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .faq-item:hover {
-            border-color: var(--primary);
-            background: rgba(99, 102, 241, 0.05);
-        }
-
-        .faq-question {
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: var(--light-text);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .faq-toggle {
-            font-size: 16px;
-            transition: transform 0.3s ease;
-            color: var(--accent-lime);
-        }
-
-        .faq-item.open .faq-toggle {
-            transform: rotate(90deg);
-        }
-
-        .faq-answer {
-            display: none;
-            font-size: 13px;
-            color: var(--dim-text);
-            line-height: 1.6;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid var(--dark-border);
-        }
-
-        .faq-item.open .faq-answer {
-            display: block;
-            animation: slideDown 0.3s ease;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                max-height: 0;
-            }
-            to {
-                opacity: 1;
-                max-height: 500px;
-            }
-        }
-
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 40px 20px;
-            border-top: 1px solid var(--dark-border);
-            color: var(--dim-text);
-            font-size: 12px;
-        }
-
-        footer a {
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-
-        /* Animations */
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 60px;
-        }
-
-        .feature-box {
-            background: linear-gradient(135deg, rgba(132, 204, 22, 0.1), rgba(14, 165, 233, 0.1));
-            border: 1px solid var(--dark-border);
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .feature-emoji {
-            font-size: 32px;
-            margin-bottom: 12px;
-        }
-
-        .feature-name {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--light-text);
-            margin-bottom: 4px;
-        }
-
-        .feature-desc {
-            font-size: 12px;
-            color: var(--dim-text);
-            line-height: 1.4;
-        }
-
-        /* Call to Action */
-        .cta-banner {
-            background: linear-gradient(135deg, var(--primary), #5558e3);
-            border-radius: 12px;
-            padding: 40px;
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .cta-banner h2 {
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 12px;
-        }
-
-        .cta-banner p {
-            font-size: 14px;
-            margin-bottom: 24px;
-            opacity: 0.9;
-        }
-
-        .cta-buttons {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .cta-btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 14px;
-        }
-
-        .cta-btn.primary {
-            background: white;
-            color: var(--primary);
-        }
-
-        .cta-btn.primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-
-        .cta-btn.secondary {
-            background: transparent;
-            border: 1px solid white;
-            color: white;
-        }
-
-        .cta-btn.secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
+        /* ── Responsive ── */
+        @media(max-width:1024px){.h-body{grid-template-columns:1fr}.sidebar{display:grid;grid-template-columns:1fr 1fr;gap:14px}}
+        @media(max-width:640px){.lobby-grid{grid-template-columns:1fr}.sidebar{grid-template-columns:1fr}.h-head{flex-wrap:wrap;gap:10px}}
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>🎮 Der Dümmste fliegt</h1>
-            <p>UI/UX Prototype Suite</p>
-            <small>Vollständiges, interaktives Design System für Browser-basiertes Party-Spiel</small>
-            <div class="tagline">
-                <span class="tag">Host View (Desktop)</span>
-                <span class="tag">Player View (Mobile)</span>
-                <span class="tag">Production Ready</span>
-                <span class="tag">No Dependencies</span>
-            </div>
-        </div>
 
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-item">
-                <div class="stat-number">5</div>
-                <div class="stat-label">Dateien</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">100%</div>
-                <div class="stat-label">Responsive</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">12</div>
-                <div class="stat-label">Color Tokens</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">∞</div>
-                <div class="stat-label">Komponenten</div>
-            </div>
-        </div>
+<!-- ═══ NAV ═══ -->
+<div class="nav" id="mainNav" style="display:none">
+    <button class="nav-btn on" onclick="nav('host')" id="navHost">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Host
+    </button>
+    <button class="nav-btn" onclick="nav('player')" id="navPlayer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/></svg>Spieler
+    </button>
+    <button class="nav-btn" onclick="nav('fragen')" id="navFragen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Fragen
+    </button>
+</div>
 
-        <!-- Features -->
-        <div class="feature-grid">
-            <div class="feature-box">
-                <div class="feature-emoji">🖥️</div>
-                <div class="feature-name">Host View</div>
-                <div class="feature-desc">Desktop-Kontrolle mit Fragen, Dashboard, Live-Log</div>
-            </div>
-            <div class="feature-box">
-                <div class="feature-emoji">📱</div>
-                <div class="feature-name">Player View</div>
-                <div class="feature-desc">Mobile-Ansicht mit Voting und Elimination</div>
-            </div>
-            <div class="feature-box">
-                <div class="feature-emoji">🎨</div>
-                <div class="feature-name">Design System</div>
-                <div class="feature-desc">Konsistente Farben, Typography, Spacing</div>
-            </div>
-            <div class="feature-box">
-                <div class="feature-emoji">⚡</div>
-                <div class="feature-name">Null Dependencies</div>
-                <div class="feature-desc">Pure HTML/CSS/JS, Google Fonts nur</div>
-            </div>
-            <div class="feature-box">
-                <div class="feature-emoji">🎬</div>
-                <div class="feature-name">Animationen</div>
-                <div class="feature-desc">CSS-only Animations für Interaktivität</div>
-            </div>
-            <div class="feature-box">
-                <div class="feature-emoji">📐</div>
-                <div class="feature-name">Responsive</div>
-                <div class="feature-desc">390px Mobile bis 1440px Desktop</div>
-            </div>
-        </div>
-
-        <!-- CTA Banner -->
-        <div class="cta-banner">
-            <h2>🚀 Sofort starten</h2>
-            <p>Alle Prototypen sind produktionsreif und können sofort in Figma oder Development übernommen werden.</p>
-            <div class="cta-buttons">
-                <a href="game_app.html" class="cta-btn primary">▶ Prototyp spielen</a>
-                <a href="duemmste_fliegt_ui.html" class="cta-btn secondary">Alte UI ansehen</a>
-                <a href="component_library.html" class="cta-btn secondary">Component Library</a>
-            </div>
-        </div>
-
-        <!-- Assets -->
-        <h2 class="section-title">📦 Alle Assets</h2>
-        <div class="assets-grid">
-            <!-- Main Prototype -->
-            <div class="asset-card">
-                <div class="asset-icon">🎮</div>
-                <div class="asset-title">Main Prototype</div>
-                <div class="asset-description">Vollständig interaktives UI-System mit allen Views und Flows</div>
-                <ul class="asset-features">
-                    <li>Host View (1440px)</li>
-                    <li>Player View (390px)</li>
-                    <li>Lobby Screen</li>
-                    <li>Voting & Elimination</li>
-                    <li>All Interactions</li>
-                </ul>
-                <a href="duemmste_fliegt_ui.html" class="asset-link">Öffnen</a>
-            </div>
-
-            <!-- Component Library -->
-            <div class="asset-card">
-                <div class="asset-icon">🎨</div>
-                <div class="asset-title">Component Library</div>
-                <div class="asset-description">Showcase aller Design-Komponenten und Design-Tokens</div>
-                <ul class="asset-features">
-                    <li>Farb-Palette (12 Tokens)</li>
-                    <li>Button-Varianten</li>
-                    <li>Status Badges</li>
-                    <li>Player Rows</li>
-                    <li>Typography Styles</li>
-                </ul>
-                <a href="component_library.html" class="asset-link">Anschauen</a>
-            </div>
-
-            <!-- Design Spec -->
-            <div class="asset-card">
-                <div class="asset-icon">📋</div>
-                <div class="asset-title">Design Specification</div>
-                <div class="asset-description">Komplette Design-Dokumentation für Entwickler und Designer</div>
-                <ul class="asset-features">
-                    <li>Design System Details</li>
-                    <li>Screen Layouts</li>
-                    <li>Interaction Flows</li>
-                    <li>Component Specs</li>
-                    <li>Implementation Notes</li>
-                </ul>
-                <a href="DESIGN_SPEC.md" class="asset-link secondary" download>Download</a>
-            </div>
-
-            <!-- Figma Setup -->
-            <div class="asset-card">
-                <div class="asset-icon">🖌️</div>
-                <div class="asset-title">Figma Setup Guide</div>
-                <div class="asset-description">Schritt-für-Schritt Anleitung zur Rekonstruktion in Figma</div>
-                <ul class="asset-features">
-                    <li>Manueller Aufbau</li>
-                    <li>Design Tokens</li>
-                    <li>Components Create</li>
-                    <li>Frame Structure</li>
-                    <li>Export Settings</li>
-                </ul>
-                <a href="FIGMA_SETUP.md" class="asset-link secondary" download>Download</a>
-            </div>
-
-            <!-- README -->
-            <div class="asset-card">
-                <div class="asset-icon">📖</div>
-                <div class="asset-title">README & Overview</div>
-                <div class="asset-description">Vollständige Übersicht aller Assets und Quick-Start Guide</div>
-                <ul class="asset-features">
-                    <li>Package Overview</li>
-                    <li>Quick Start</li>
-                    <li>Tech Stack</li>
-                    <li>Next Steps</li>
-                    <li>Support Info</li>
-                </ul>
-                <a href="README.md" class="asset-link secondary" download>Download</a>
-            </div>
-
-            <!-- Project Files -->
-            <div class="asset-card">
-                <div class="asset-icon">📂</div>
-                <div class="asset-title">All Project Files</div>
-                <div class="asset-description">Download alle Dateien als ZIP zum lokalen Arbeiten</div>
-                <ul class="asset-features">
-                    <li>Alle HTML/CSS/JS</li>
-                    <li>Alle Dokumentation</li>
-                    <li>Design System</li>
-                    <li>Keine Setup nötig</li>
-                    <li>Sofort einsatzbereit</li>
-                </ul>
-                <button class="asset-link" onclick="downloadAllFiles()">Download ZIP</button>
-            </div>
-        </div>
-
-        <!-- FAQ -->
-        <h2 class="section-title" style="margin-top: 80px;">❓ Häufig gestellte Fragen</h2>
-        <div class="faq-grid">
-            <div class="faq-item">
-                <div class="faq-question">
-                    Brauche ich einen Server zum Testen?
-                    <span class="faq-toggle">›</span>
-                </div>
-                <div class="faq-answer">
-                    Nein! Öffne `duemmste_fliegt_ui.html` einfach im Browser. Das Prototype ist vollständig standalone und funktioniert offline. Für die echte Anwendung brauchst du dann Backend + WebSocket.
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">
-                    Kann ich das in Figma importieren?
-                    <span class="faq-toggle">›</span>
-                </div>
-                <div class="faq-answer">
-                    Ja! Nutze `FIGMA_SETUP.md` als Guide. Es gibt zwei Optionen: (1) Manueller Aufbau von Grund auf, oder (2) Export aus HTML + Screenshot-Import. Die Anleitung ist sehr detailliert.
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">
-                    Welche Browser werden unterstützt?
-                    <span class="faq-toggle">›</span>
-                </div>
-                <div class="faq-answer">
-                    Chrome, Firefox, Safari, Edge (alle modernen Versionen). Auch auf Mobile Browsern (iOS Safari, Chrome Mobile). Das UI ist voll responsive und funktioniert überall.
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">
-                    Kann ich den Code anpassen / branchen?
-                    <span class="faq-toggle">›</span>
-                </div>
-                <div class="faq-answer">
-                    Absolut! Der Code ist vollständig dokumentiert und modular. Alle CSS-Variablen sind zentral definiert, sodass du Farben/Spacing leicht anpassen kannst. JavaScript ist minimal und einfach erweiterbar.
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">
-                    Wie integriere ich ein Backend?
-                    <span class="faq-toggle">›</span>
-                </div>
-                <div class="faq-answer">
-                    Siehe `DESIGN_SPEC.md` Sektion "Implementation Notes". Das UI ist vom Backend unabhängig. Du ersetzt einfach die Mock-Daten durch API-Calls (POST `/api/game/answer`, WebSocket `/api/updates`, etc.).
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">
-                    Kann ich das Farbschema ändern?
-                    <span class="faq-toggle">›</span>
-                </div>
-                <div class="faq-answer">
-                    Ja, super einfach! Alle Farben sind als CSS-Variablen definiert (`:root { --primary: #6366f1; }` etc.). Ändere die Hex-Werte, und das ganze UI aktualisiert sich automatisch.
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <footer>
-            <p style="margin-bottom: 16px;">
-                <strong>Der Dümmste fliegt – UI Prototype Suite v1.0</strong>
-            </p>
-            <p style="margin-bottom: 16px;">
-                Production-ready Design System für Browser-basiertes Party-Spiel<br>
-                Built with HTML5 + CSS3 + Vanilla JavaScript
-            </p>
-            <p>
-                Fonts: <a href="https://fonts.google.com/specimen/Plus+Jakarta+Sans" target="_blank">Plus Jakarta Sans</a> | 
-                <a href="https://fonts.google.com/specimen/Space+Mono" target="_blank">Space Mono</a> (Google Fonts)<br>
-                Free to use for the Der Dümmste fliegt project
-            </p>
-            <p style="margin-top: 24px; opacity: 0.5;">
-                Last Updated: Feb 2025 | Status: 🟢 Production Ready
-            </p>
-        </footer>
+<!-- ═══ ROLE SELECT ═══ -->
+<div id="roleSelect">
+    <div class="pick">
+        <h1>Der Dümmste fliegt</h1>
+        <p>Wähle deine Rolle</p>
+        <button class="role-btn" onclick="pickRole('host')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <h2>Host</h2>
+            <small>Spiel steuern, Antworten bewerten</small>
+        </button>
+        <button class="role-btn" onclick="pickRole('player')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none"/></svg>
+            <h2>Spieler</h2>
+            <small>Fragen hören, abstimmen</small>
+        </button>
     </div>
+</div>
 
-    <script>
-        // FAQ Toggle
-        document.querySelectorAll('.faq-item').forEach(item => {
-            item.addEventListener('click', function() {
-                this.classList.toggle('open');
-            });
+<!-- ═══ JOIN (Player) ═══ -->
+<div class="overlay" id="joinScreen">
+    <div class="join-box g">
+        <div style="text-align:center;font-size:22px;font-weight:800;color:var(--lime)">Beitreten</div>
+        <div id="joinForm">
+            <input type="text" id="nameInput" placeholder="Dein Name..." style="width:100%;margin-bottom:12px">
+            <button class="btn btn-a" onclick="joinGame()" style="width:100%">Beitreten</button>
+            <button class="btn btn-g" onclick="backToRoles()" style="width:100%;margin-top:8px">Zurück</button>
+        </div>
+        <div id="joinLoading" style="display:none;text-align:center;padding:20px">
+            <div class="spin" style="margin:0 auto 12px"></div>
+            <div style="color:var(--text2);font-size:13px">Verbinde...</div>
+        </div>
+        <div id="joinError" style="display:none;text-align:center">
+            <div style="font-size:16px;font-weight:700;color:var(--danger);margin-bottom:8px" id="joinErrorMsg">Fehler</div>
+            <button class="btn btn-a" onclick="resetJoin()">Erneut versuchen</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ LOBBY ═══ -->
+<div id="lobby">
+    <div class="lobby-wrap">
+        <h1>Der Dümmste fliegt</h1>
+        <div class="lobby-sub">Spieler einladen und Spiel starten</div>
+        <div class="lobby-grid">
+            <div class="lobby-card g">
+                <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Links</h3>
+                <div class="label">Host-Link</div>
+                <div class="link-box">https://party-game.local/host?room=PARTY</div>
+                <button class="btn btn-g" style="width:100%;margin-bottom:14px" onclick="copyLink('Host-Link kopiert')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Kopieren</button>
+                <div class="label">Spieler-Link (OTP)</div>
+                <div class="link-box">https://party-game.local/join?name=&amp;otp=xyz789</div>
+                <button class="btn btn-g" style="width:100%" onclick="copyLink('Player-Link kopiert')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Kopieren</button>
+            </div>
+            <div class="lobby-card g">
+                <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Spieler (<span id="lobbyCount">3</span>)</h3>
+                <div id="lobbyList" style="display:flex;flex-direction:column;gap:6px"></div>
+            </div>
+            <div class="start-sec">
+                <button class="btn btn-s" id="startBtn" onclick="startGame()" style="width:100%;padding:13px;font-size:15px">Spiel starten</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ HOST VIEW ═══ -->
+<div id="hostView">
+    <div class="h-head">
+        <div class="h-title">Der Dümmste fliegt</div>
+        <div class="h-badges">
+            <div class="badge">Room <b>PARTY</b></div>
+            <div class="badge">R<b id="hRound">1</b></div>
+            <div class="badge">Q<b id="hQNum">1</b>/2</div>
+            <div class="badge badge-live">LIVE</div>
+        </div>
+        <div style="display:flex;gap:6px">
+            <button class="btn btn-g" onclick="copyLink('Link kopiert')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Link</button>
+            <button class="btn btn-d" onclick="showEndModal()">Beenden</button>
+        </div>
+    </div>
+    <div class="h-body">
+        <div class="h-main">
+            <div class="h-card g"><div class="label">Aktueller Spieler</div><div class="h-card-content" id="hPlayer">Max</div></div>
+            <div class="h-card g q-card"><div class="label">Frage</div><div class="h-card-content" id="hQuestion">...</div></div>
+            <div class="h-card g a-card"><div class="label a-label">Korrekte Antwort (nur Host)</div><div class="h-card-content" id="hAnswer">...</div></div>
+            <div class="actions">
+                <button class="btn-act bc" onclick="mark('correct')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Richtig<span class="kbd">R</span></button>
+                <button class="btn-act bw" onclick="mark('wrong')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Falsch<span class="kbd">F</span></button>
+                <button class="btn-act bs" onclick="mark('skip')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>Skip<span class="kbd">S</span></button>
+            </div>
+        </div>
+        <div class="sidebar">
+            <div class="panel g">
+                <div class="p-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Spieler</div>
+                <div id="hPlayers"></div>
+            </div>
+            <div class="panel g" style="flex:1;min-height:340px">
+                <div class="p-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Protokoll</div>
+                <div class="log-wrap" id="hLog"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ PLAYER VIEW ═══ -->
+<div id="playerView">
+    <div class="pv-head g"><div><div class="pv-room">PARTY</div><div class="pv-status">Runde <span id="pRound">1</span> · Frage <span id="pQNum">1</span>/2</div></div></div>
+    <div class="pv-question g"><div class="pv-q" id="pQuestion">...</div><div class="pv-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Antworte über Voice / Discord</div></div>
+    <div class="pv-wait"><div class="spin"></div>Host bewertet gerade...</div>
+    <div class="pv-dash g"><div class="pv-dash-t">Alle Spieler</div><div id="pPlayers"></div></div>
+</div>
+
+<!-- ═══ FRAGEN-TABELLE ═══ -->
+<div id="fragenView">
+    <div class="fragen-wrap">
+        <h1>Fragen-Vorlage</h1>
+        <div class="fragen-sub">Fragenpool für das Spiel. Innerhalb einer Session wiederholt sich keine Frage.</div>
+        <table class="q-table" id="fragenTable"></table>
+    </div>
+</div>
+
+<!-- ═══ OVERLAYS ═══ -->
+
+<!-- Voting -->
+<div class="overlay" id="voteOverlay">
+    <div class="overlay-box g">
+        <div style="text-align:center;font-size:18px;font-weight:800">Wer war am schlechtesten?</div>
+        <div style="background:var(--surface);border:1px solid var(--border-s);border-radius:var(--rs);padding:10px;font-size:12px;color:var(--text2);text-align:center;line-height:1.6">Genau <b>1 Stimme</b> pro Runde. <b>Nicht für dich selbst.</b></div>
+        <div id="voteCandidates" style="display:flex;flex-direction:column;gap:8px"></div>
+        <div style="display:flex;gap:8px">
+            <button class="btn btn-a" id="voteSubmitBtn" onclick="submitVote()" style="flex:1" disabled>Abstimmen</button>
+            <button class="btn btn-m" onclick="closeOverlay('voteOverlay')" style="flex:1">Zurück</button>
+        </div>
+    </div>
+</div>
+
+<!-- Vote Confirmation -->
+<div class="overlay" id="voteConfirm">
+    <div class="overlay-box g" style="text-align:center">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <div style="font-size:16px;font-weight:700;color:var(--success)">Stimme registriert</div>
+        <div style="color:var(--text3);font-size:13px">Warte auf andere Spieler...</div>
+        <div class="spin" style="margin:0 auto"></div>
+    </div>
+</div>
+
+<!-- Elimination -->
+<div class="overlay" id="elimOverlay">
+    <div class="overlay-box g" style="text-align:center">
+        <div style="font-size:24px;font-weight:800;color:var(--danger)">Du bist raus</div>
+        <div style="color:var(--text2);font-size:14px">0 Leben übrig. Schau dir den Rest an.</div>
+        <button class="btn btn-m" onclick="startSpectate()" style="margin:8px auto 0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Zuschauen</button>
+    </div>
+</div>
+
+<!-- Estimation -->
+<div class="overlay" id="estOverlay">
+    <div class="overlay-box g" style="text-align:center">
+        <div style="font-size:24px;font-weight:800;color:var(--accent)">Schätzspiel</div>
+        <div style="color:var(--text2);font-size:14px">Nur noch 2 Spieler. Wechsel ins Schätzspiel.</div>
+        <button class="btn btn-a" onclick="closeOverlay('estOverlay')">Weiter</button>
+    </div>
+</div>
+
+<!-- End Game Modal -->
+<div class="overlay" id="endModal">
+    <div class="overlay-box g" style="text-align:center">
+        <div style="font-size:18px;font-weight:800">Spiel beenden?</div>
+        <div style="color:var(--text3);font-size:13px">Alle Daten gehen verloren.</div>
+        <div style="display:flex;gap:8px">
+            <button class="btn btn-d" onclick="confirmEnd()" style="flex:1">Beenden</button>
+            <button class="btn btn-m" onclick="closeOverlay('endModal')" style="flex:1">Abbrechen</button>
+        </div>
+    </div>
+</div>
+
+<!-- Error States -->
+<div class="overlay" id="errorOverlay">
+    <div class="overlay-box g" style="text-align:center">
+        <div style="font-size:18px;font-weight:700;color:var(--danger)" id="errorTitle">Fehler</div>
+        <div style="color:var(--text2);font-size:13px" id="errorMsg"></div>
+        <button class="btn btn-a" onclick="closeOverlay('errorOverlay')">OK</button>
+    </div>
+</div>
+
+<script>
+// ════════════════ STATE ════════════════
+const S = {
+    role: null,
+    phase: 'select', // select, lobby, game, voting, estimation, ended
+    round: 1,
+    qInRound: 1,
+    pIdx: 0,
+    playerName: null,
+    vote: null,
+    voted: false,
+    spectating: false,
+    players: [
+        {name:'Max', lives:3, out:false},
+        {name:'Lisa', lives:3, out:false},
+        {name:'Tom', lives:3, out:false}
+    ],
+    usedQ: new Set(),
+    curQ: null,
+    votes: {},
+    log: []
+};
+
+// ════════════════ QUESTIONS ════════════════
+const Q = [
+    {q:'Welcher Planet ist der größte in unserem Sonnensystem?', a:'Jupiter', k:'Astronomie'},
+    {q:'Wie viele Kontinente gibt es?', a:'7', k:'Geographie'},
+    {q:'Welcher Fluss ist der längste in Afrika?', a:'Nil', k:'Geographie'},
+    {q:'In welchem Jahr fiel die Berliner Mauer?', a:'1989', k:'Geschichte'},
+    {q:'Wie viele Seiten hat ein Würfel?', a:'6', k:'Mathematik'},
+    {q:'Welche Farbe hat ein Smaragd?', a:'Grün', k:'Allgemeinwissen'},
+    {q:'Wer malte die Mona Lisa?', a:'Leonardo da Vinci', k:'Kunst'},
+    {q:'Was ist die Hauptstadt von Australien?', a:'Canberra', k:'Geographie'},
+    {q:'Wie viele Zähne hat ein erwachsener Mensch?', a:'32', k:'Biologie'},
+    {q:'Welches Element hat das Kürzel Fe?', a:'Eisen', k:'Chemie'},
+    {q:'In welchem Land steht die Akropolis?', a:'Griechenland', k:'Geschichte'},
+    {q:'Wie viele Spieler hat eine Fußballmannschaft auf dem Feld?', a:'11', k:'Sport'},
+    {q:'Welches Tier ist das größte Säugetier der Welt?', a:'Blauwal', k:'Biologie'},
+    {q:'Was ist die Quadratwurzel von 144?', a:'12', k:'Mathematik'},
+    {q:'Welcher Ozean ist der größte?', a:'Pazifik', k:'Geographie'},
+    {q:'Wie heißt der höchste Berg der Erde?', a:'Mount Everest', k:'Geographie'},
+    {q:'Welches Gas atmen Pflanzen ein?', a:'Kohlendioxid (CO₂)', k:'Biologie'},
+    {q:'Wer schrieb "Faust"?', a:'Johann Wolfgang von Goethe', k:'Literatur'},
+    {q:'Wie viele Bundesländer hat Deutschland?', a:'16', k:'Politik'},
+    {q:'Was ist die chemische Formel von Wasser?', a:'H₂O', k:'Chemie'},
+    {q:'In welchem Jahr begann der Zweite Weltkrieg?', a:'1939', k:'Geschichte'},
+    {q:'Welche Farbe hat Cobalt?', a:'Blau', k:'Chemie'},
+    {q:'Wie viele Planeten hat unser Sonnensystem?', a:'8', k:'Astronomie'},
+    {q:'Was ist die Hauptstadt von Kanada?', a:'Ottawa', k:'Geographie'},
+    {q:'Welches Organ pumpt Blut durch den Körper?', a:'Herz', k:'Biologie'},
+    {q:'Wie heißt die längste Gebirgskette der Welt?', a:'Anden', k:'Geographie'},
+    {q:'Welcher Vogel kann nicht fliegen und lebt in der Antarktis?', a:'Pinguin', k:'Biologie'},
+    {q:'Wie viele Minuten hat eine Stunde?', a:'60', k:'Allgemeinwissen'},
+    {q:'Welches Land hat die meisten Einwohner?', a:'Indien', k:'Geographie'},
+    {q:'Was bedeutet die Abkürzung URL?', a:'Uniform Resource Locator', k:'Technik'},
+];
+
+// ════════════════ SVG TEMPLATES ════════════════
+const heartSVG = (empty) => `<svg class="life${empty?' x':''}" viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+const hearts = (n, max=3) => Array.from({length:max},(_,i) => heartSVG(i>=n)).join('');
+
+// ════════════════ NAV ════════════════
+function nav(view) {
+    ['hostView','playerView','fragenView'].forEach(id => {
+        document.getElementById(id).classList.remove('on');
+    });
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('on'));
+    if (view === 'host') { document.getElementById('hostView').classList.add('on'); document.getElementById('navHost').classList.add('on'); }
+    if (view === 'player') { document.getElementById('playerView').classList.add('on'); document.getElementById('navPlayer').classList.add('on'); }
+    if (view === 'fragen') { document.getElementById('fragenView').classList.add('on'); document.getElementById('navFragen').classList.add('on'); }
+}
+
+// ════════════════ ROLE SELECT ════════════════
+function pickRole(role) {
+    S.role = role;
+    document.getElementById('roleSelect').style.display = 'none';
+    document.getElementById('mainNav').style.display = 'flex';
+    if (role === 'host') {
+        S.phase = 'lobby';
+        document.getElementById('lobby').classList.add('on');
+        updateLobby();
+    } else {
+        document.getElementById('joinScreen').classList.add('on');
+    }
+}
+function backToRoles() {
+    closeOverlay('joinScreen');
+    document.getElementById('mainNav').style.display = 'none';
+    document.getElementById('roleSelect').style.display = 'flex';
+}
+
+// ════════════════ JOIN ════════════════
+function joinGame() {
+    const name = document.getElementById('nameInput').value.trim();
+    if (!name) { toast('Bitte Namen eingeben'); return; }
+    if (S.players.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+        showJoinErr('Name bereits vergeben'); return;
+    }
+    S.playerName = name;
+    document.getElementById('joinForm').style.display = 'none';
+    document.getElementById('joinLoading').style.display = 'block';
+    setTimeout(() => {
+        document.getElementById('joinLoading').style.display = 'none';
+        closeOverlay('joinScreen');
+        S.phase = 'lobby';
+        document.getElementById('lobby').classList.add('on');
+        updateLobby();
+    }, 1200);
+}
+function showJoinErr(msg) {
+    document.getElementById('joinForm').style.display = 'none';
+    document.getElementById('joinErrorMsg').textContent = msg;
+    document.getElementById('joinError').style.display = 'block';
+}
+function resetJoin() {
+    document.getElementById('joinError').style.display = 'none';
+    document.getElementById('joinForm').style.display = 'block';
+    document.getElementById('nameInput').value = '';
+    document.getElementById('nameInput').focus();
+}
+function showError(title, msg) {
+    document.getElementById('errorTitle').textContent = title;
+    document.getElementById('errorMsg').textContent = msg;
+    document.getElementById('errorOverlay').classList.add('on');
+}
+
+// ════════════════ LOBBY ════════════════
+function updateLobby() {
+    const active = S.players.filter(p => !p.out);
+    document.getElementById('lobbyCount').textContent = active.length;
+    document.getElementById('lobbyList').innerHTML = active.map(p =>
+        `<div class="joined-item"><div class="avatar">${p.name[0]}</div>${p.name}</div>`
+    ).join('');
+    document.getElementById('startBtn').disabled = active.length < 2;
+}
+
+// ════════════════ START GAME ════════════════
+function startGame() {
+    if (S.players.filter(p => !p.out).length < 2) return;
+    S.phase = 'game';
+    S.round = 1; S.qInRound = 1; S.pIdx = 0;
+    document.getElementById('lobby').classList.remove('on');
+    if (S.role === 'host') nav('host'); else nav('player');
+    nextQ();
+}
+
+// ════════════════ GAME LOGIC ════════════════
+function nextQ() {
+    const active = S.players.filter(p => !p.out);
+    if (active.length <= 2) { S.phase = 'estimation'; document.getElementById('estOverlay').classList.add('on'); return; }
+    if (S.qInRound > 2) { startVoting(); return; }
+
+    // skip eliminated players
+    while (S.pIdx < S.players.length && S.players[S.pIdx].out) S.pIdx++;
+    if (S.pIdx >= S.players.length) { S.pIdx = 0; S.qInRound++; nextQ(); return; }
+
+    // pick unused question
+    if (S.usedQ.size >= Q.length) S.usedQ.clear();
+    let qi;
+    do { qi = Math.floor(Math.random() * Q.length); } while (S.usedQ.has(qi));
+    S.usedQ.add(qi);
+    S.curQ = Q[qi];
+    render();
+}
+
+function mark(result) {
+    const p = S.players[S.pIdx];
+    if (!p) return;
+    let delta = 0;
+    if (result === 'skip') {
+        addLog(p.name, S.curQ.q, 'skip', 0);
+        // skip = new question for same player
+        nextQ();
+        return;
+    }
+    if (result === 'wrong') {
+        p.lives--; delta = -1;
+        if (p.lives <= 0) { p.lives = 0; p.out = true; }
+    }
+    addLog(p.name, S.curQ.q, result, delta);
+    toast(result === 'correct' ? 'RICHTIG' : 'FALSCH — ' + p.name + ' ' + p.lives + ' Leben');
+
+    // advance
+    S.pIdx++;
+    while (S.pIdx < S.players.length && S.players[S.pIdx].out) S.pIdx++;
+    if (S.pIdx >= S.players.length) { S.pIdx = 0; S.qInRound++; }
+    nextQ();
+}
+
+function adjustLife(name, d) {
+    const p = S.players.find(x => x.name === name);
+    if (p) { p.lives = Math.max(0, Math.min(5, p.lives + d)); if (p.lives > 0) p.out = false; if (p.lives === 0) p.out = true; render(); }
+}
+
+// ════════════════ VOTING ════════════════
+function startVoting() {
+    S.phase = 'voting'; S.vote = null; S.voted = false;
+    document.getElementById('voteSubmitBtn').disabled = true;
+    const self = S.playerName || '';
+    const cands = S.players.filter(p => !p.out && p.name !== self);
+    document.getElementById('voteCandidates').innerHTML = cands.map(p =>
+        `<button class="vc" onclick="pickVote('${p.name}',this)">${p.name}<div style="font-size:11px;color:var(--text3);margin-top:3px">${p.lives} Leben</div></button>`
+    ).join('');
+    document.getElementById('voteOverlay').classList.add('on');
+}
+function pickVote(name, el) {
+    document.querySelectorAll('.vc').forEach(c => c.classList.remove('sel'));
+    el.classList.add('sel');
+    S.vote = name;
+    document.getElementById('voteSubmitBtn').disabled = false;
+}
+function submitVote() {
+    if (S.voted || !S.vote) return;
+    S.votes[S.vote] = (S.votes[S.vote] || 0) + 1;
+    S.voted = true;
+    closeOverlay('voteOverlay');
+    document.getElementById('voteConfirm').classList.add('on');
+    setTimeout(processVotes, 2000);
+}
+function processVotes() {
+    closeOverlay('voteConfirm');
+    if (Object.keys(S.votes).length > 0) {
+        let max = 0, top = [];
+        for (const [n, v] of Object.entries(S.votes)) { if (v > max) { max = v; top = [n]; } else if (v === max) top.push(n); }
+        top.forEach(n => {
+            const p = S.players.find(x => x.name === n);
+            if (p) { p.lives--; if (p.lives <= 0) { p.lives = 0; p.out = true; } }
         });
+        toast(top.join(', ') + ': −1 Leben');
+    }
+    const active = S.players.filter(p => !p.out);
+    if (active.length <= 2) { S.phase = 'estimation'; document.getElementById('estOverlay').classList.add('on'); return; }
+    if (active.length < 2) { toast('Spiel vorbei'); resetAll(); return; }
+    S.round++; S.qInRound = 1; S.pIdx = 0; S.votes = {}; S.voted = false; S.vote = null;
+    S.phase = 'game';
+    nextQ();
+}
 
-        // Download all files function
-        function downloadAllFiles() {
-            alert('Um alle Dateien zu downloaden, kopiere bitte folgende Dateien:\n\n✓ duemmste_fliegt_ui.html\n✓ component_library.html\n✓ DESIGN_SPEC.md\n✓ FIGMA_SETUP.md\n✓ README.md\n\nSie sind alle in deinem Projekt-Ordner enthalten.');
-        }
+// ════════════════ RENDER ════════════════
+function render() {
+    const p = S.players[S.pIdx];
+    // Host
+    if (document.getElementById('hostView').classList.contains('on') || S.role === 'host') {
+        document.getElementById('hRound').textContent = S.round;
+        document.getElementById('hQNum').textContent = S.qInRound;
+        document.getElementById('hPlayer').textContent = p ? p.name : '—';
+        document.getElementById('hQuestion').textContent = S.curQ ? S.curQ.q : '...';
+        document.getElementById('hAnswer').textContent = S.curQ ? S.curQ.a : '...';
+        document.getElementById('hPlayers').innerHTML = S.players.map(x =>
+            `<div class="p-row${x.out?' elim':''}"><span class="p-name">${x.name}</span><div class="p-lives">${hearts(x.lives)}</div><div class="p-ctrl"><button class="btn-l" onclick="adjustLife('${x.name}',1)">+</button><button class="btn-l" onclick="adjustLife('${x.name}',-1)">&minus;</button></div></div>`
+        ).join('');
+    }
+    // Player
+    document.getElementById('pRound').textContent = S.round;
+    document.getElementById('pQNum').textContent = S.qInRound;
+    document.getElementById('pQuestion').textContent = S.curQ ? S.curQ.q : '...';
+    const self = S.playerName || '';
+    document.getElementById('pPlayers').innerHTML = S.players.map(x =>
+        `<div class="pv-item${x.name===self?' me':''}${x.out?' out':''}">${x.name}${x.name===self?' (Du)':''}<div style="display:flex;gap:2px">${hearts(x.lives)}</div></div>`
+    ).join('');
+}
 
-        // Scroll animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
+function addLog(name, q, result, delta) {
+    const t = new Date();
+    const ts = String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0')+':'+String(t.getSeconds()).padStart(2,'0');
+    const shortQ = q.length > 28 ? q.slice(0,25)+'...' : q;
+    const pillCls = result==='correct'?'pill-ok':result==='wrong'?'pill-no':'pill-sk';
+    const pillTxt = result==='correct'?'RICHTIG':result==='wrong'?'FALSCH':'SKIP';
+    const lifeStr = delta ? ' '+delta : '';
+    S.log.unshift({ts,name,shortQ,pillCls,pillTxt,lifeStr});
+    const el = document.getElementById('hLog');
+    if (el) el.innerHTML = S.log.slice(0,50).map(e =>
+        `<div class="log-e"><span style="color:var(--text3)">${e.ts}</span> <b>${e.name}</b> ${e.shortQ} <span class="pill ${e.pillCls}">${e.pillTxt}</span>${e.lifeStr}</div>`
+    ).join('');
+}
 
-        const observer = new IntersectionObserver(function(entries) {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.animation = 'slideInUp 0.6s ease forwards';
-                }
-            });
-        }, observerOptions);
+// ════════════════ HELPERS ════════════════
+function closeOverlay(id) { document.getElementById(id).classList.remove('on'); }
+function showEndModal() { document.getElementById('endModal').classList.add('on'); }
+function confirmEnd() { closeOverlay('endModal'); resetAll(); }
+function startSpectate() { S.spectating = true; closeOverlay('elimOverlay'); }
+function copyLink(msg) { navigator.clipboard.writeText('https://party-game.local/join?otp=xyz789'); toast(msg); }
 
-        document.querySelectorAll('.asset-card, .faq-item').forEach(el => {
-            observer.observe(el);
-        });
-    </script>
+function toast(msg) {
+    document.querySelectorAll('.toast').forEach(t => t.remove());
+    const t = document.createElement('div'); t.className='toast'; t.textContent=msg;
+    document.body.appendChild(t); setTimeout(() => t.remove(), 2200);
+}
+
+function resetAll() {
+    S.phase='select'; S.round=1; S.qInRound=1; S.pIdx=0; S.playerName=null;
+    S.vote=null; S.voted=false; S.spectating=false; S.usedQ.clear(); S.votes={}; S.log=[];
+    S.players.forEach(p => { p.lives=3; p.out=false; });
+    ['hostView','playerView','fragenView','lobby'].forEach(id => document.getElementById(id).classList.remove('on'));
+    document.querySelectorAll('.overlay').forEach(o => o.classList.remove('on'));
+    document.getElementById('mainNav').style.display='none';
+    document.getElementById('roleSelect').style.display='flex';
+}
+
+// Keyboard shortcuts (host)
+document.addEventListener('keydown', e => {
+    if (S.role==='host' && S.phase==='game') {
+        if (e.key==='r'||e.key==='R') mark('correct');
+        if (e.key==='f'||e.key==='F') mark('wrong');
+        if (e.key==='s'||e.key==='S') mark('skip');
+    }
+});
+
+// ════════════════ FRAGEN TABLE ════════════════
+function renderFragenTable() {
+    const cats = [...new Set(Q.map(q => q.k))].sort();
+    let html = '<thead><tr><th class="nr">Nr</th><th>Frage</th><th>Antwort</th><th>Kategorie</th></tr></thead><tbody>';
+    Q.forEach((q, i) => {
+        html += `<tr><td class="nr">${i+1}</td><td>${q.q}</td><td class="ans">${q.a}</td><td class="kat">${q.k}</td></tr>`;
+    });
+    html += '</tbody>';
+    document.getElementById('fragenTable').innerHTML = html;
+}
+renderFragenTable();
+</script>
 </body>
 </html>
