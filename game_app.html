@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Der Dümmste fliegt – Party Game</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --neutral: #64748b;
+            --accent-lime: #84cc16;
+            --accent-coral: #ff6b6b;
+            --accent-sky: #0ea5e9;
+            --dark-bg: #0f172a;
+            --dark-card: #1e293b;
+            --dark-border: #334155;
+            --light-text: #f1f5f9;
+            --dim-text: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1a1f35 100%);
+            color: var(--light-text);
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* ============ SIDE SELECTOR ============ */
+        .side-selector {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .side-selector.active {
+            display: flex;
+        }
+
+        .side-selector-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            max-width: 800px;
+            width: 90%;
+        }
+
+        .side-btn {
+            padding: 60px 40px;
+            background: var(--dark-card);
+            border: 2px solid var(--dark-border);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .side-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-8px);
+            box-shadow: 0 16px 32px rgba(99, 102, 241, 0.2);
+        }
+
+        .side-icon {
+            font-size: 64px;
+        }
+
+        .side-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--light-text);
+        }
+
+        .side-desc {
+            font-size: 12px;
+            color: var(--dim-text);
+            line-height: 1.6;
+        }
+
+        /* ============ HOST VIEW ============ */
+        .host-view {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+        }
+
+        .host-view.active {
+            display: flex;
+        }
+
+        .host-header {
+            background: linear-gradient(90deg, rgba(99, 102, 241, 0.1), rgba(14, 165, 233, 0.05));
+            border-bottom: 1px solid var(--dark-border);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .host-title {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--accent-lime), var(--accent-sky));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .host-status {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .badge {
+            padding: 8px 14px;
+            background: rgba(132, 204, 22, 0.15);
+            border: 1px solid var(--accent-lime);
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent-lime);
+        }
+
+        .host-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 24px;
+            flex: 1;
+            padding: 24px 40px;
+            overflow: hidden;
+        }
+
+        .main-card {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            overflow-y: auto;
+        }
+
+        .card-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--accent-lime);
+            letter-spacing: 1px;
+        }
+
+        .player-name-display {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--light-text);
+        }
+
+        .question-display {
+            background: linear-gradient(135deg, rgba(132, 204, 22, 0.1), rgba(14, 165, 233, 0.1));
+            border: 2px solid var(--accent-lime);
+            border-radius: 12px;
+            padding: 24px;
+            min-height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .question-text {
+            font-size: 22px;
+            font-weight: 700;
+            line-height: 1.5;
+        }
+
+        .answer-section {
+            background: rgba(34, 197, 94, 0.1);
+            border: 2px dashed var(--success);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .answer-label {
+            color: var(--success);
+            margin-bottom: 8px;
+        }
+
+        .answer-text {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .btn-action {
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: white;
+        }
+
+        .btn-correct {
+            background: linear-gradient(135deg, var(--success), #16a34a);
+        }
+
+        .btn-correct:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(34, 197, 94, 0.4);
+        }
+
+        .btn-wrong {
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+        }
+
+        .btn-wrong:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-skip {
+            background: linear-gradient(135deg, var(--accent-sky), #0284c7);
+        }
+
+        .btn-skip:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(14, 165, 233, 0.4);
+        }
+
+        /* ============ SIDEBAR ============ */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .panel {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--accent-lime);
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+            font-size: 13px;
+        }
+
+        .player-item.eliminated {
+            opacity: 0.4;
+            border-left-color: var(--danger);
+        }
+
+        .player-name {
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .hearts {
+            display: flex;
+            gap: 2px;
+            margin: 0 10px;
+            font-size: 14px;
+        }
+
+        .heart {
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .heart.empty {
+            opacity: 0.2;
+        }
+
+        .life-controls {
+            display: flex;
+            gap: 4px;
+        }
+
+        .btn-life {
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            font-size: 12px;
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-life:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* ============ PLAYER VIEW ============ */
+        .player-view {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+        }
+
+        .player-view.active {
+            display: flex;
+        }
+
+        .player-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 24px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .player-header {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .room-info {
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            color: var(--accent-lime);
+            font-weight: 700;
+        }
+
+        .round-info {
+            font-size: 12px;
+            color: var(--dim-text);
+            font-weight: 600;
+        }
+
+        .question-card {
+            background: linear-gradient(135deg, rgba(132, 204, 22, 0.15), rgba(14, 165, 233, 0.15));
+            border: 2px solid var(--accent-lime);
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+            min-height: 240px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .question-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--light-text);
+        }
+
+        .hint-text {
+            font-size: 12px;
+            color: var(--dim-text);
+            font-style: italic;
+        }
+
+        .waiting-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--primary);
+            border-top: 3px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .dashboard {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .dashboard-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--accent-lime);
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        .player-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .player-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+            font-size: 13px;
+        }
+
+        .player-row.self {
+            background: rgba(132, 204, 22, 0.15);
+            border-left-color: var(--accent-lime);
+        }
+
+        .player-row.eliminated {
+            opacity: 0.4;
+            border-left-color: var(--danger);
+        }
+
+        /* ============ VOTING SCREEN ============ */
+        .voting-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .voting-overlay.active {
+            display: flex;
+        }
+
+        .voting-box {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            animation: slideInUp 0.5s ease;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .voting-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--light-text);
+        }
+
+        .voting-rules {
+            background: rgba(132, 204, 22, 0.1);
+            border: 1px solid var(--accent-lime);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 12px;
+            color: var(--dim-text);
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .vote-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+        }
+
+        .vote-card {
+            padding: 16px;
+            background: var(--dark-card);
+            border: 2px solid var(--dark-border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            border-color: var(--dark-border);
+        }
+
+        .vote-card:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .vote-card.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            background: transparent;
+        }
+
+        .vote-card.selected {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .voting-confirm {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-submit {
+            flex: 1;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            background: #5558e3;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-cancel {
+            padding: 12px 24px;
+            background: transparent;
+            border: 1px solid var(--dark-border);
+            color: var(--dim-text);
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel:hover {
+            border-color: var(--primary);
+            color: var(--light-text);
+        }
+
+        /* ============ ELIMINATION SCREEN ============ */
+        .elimination-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(15, 23, 42, 0.95));
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .elimination-overlay.active {
+            display: flex;
+        }
+
+        .elimination-box {
+            background: var(--dark-card);
+            border: 2px solid var(--danger);
+            border-radius: 16px;
+            padding: 60px 40px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            animation: slideInUp 0.5s ease;
+        }
+
+        .elimination-icon {
+            font-size: 64px;
+        }
+
+        .elimination-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--danger);
+        }
+
+        .elimination-text {
+            font-size: 14px;
+            color: var(--dim-text);
+            line-height: 1.6;
+        }
+
+        .btn-spectate {
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-spectate:hover {
+            background: #5558e3;
+            transform: translateY(-2px);
+        }
+
+        /* ============ ESTIMATION SCREEN ============ */
+        .estimation-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(15, 23, 42, 0.95));
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .estimation-overlay.active {
+            display: flex;
+        }
+
+        .estimation-box {
+            background: var(--dark-card);
+            border: 2px solid var(--accent-sky);
+            border-radius: 16px;
+            padding: 60px 40px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            animation: slideInUp 0.5s ease;
+        }
+
+        .estimation-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--accent-sky);
+        }
+
+        /* ============ LOBBY ============ */
+        .lobby-screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            gap: 40px;
+        }
+
+        .lobby-screen.active {
+            display: flex;
+        }
+
+        .lobby-content {
+            text-align: center;
+            max-width: 600px;
+        }
+
+        .lobby-title {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--accent-lime), var(--accent-sky), var(--accent-coral));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+
+        .lobby-subtitle {
+            font-size: 16px;
+            color: var(--dim-text);
+            margin-bottom: 32px;
+        }
+
+        .link-section {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .link-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--accent-lime);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .link-display {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid var(--dark-border);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            color: var(--accent-sky);
+            word-break: break-all;
+            margin-bottom: 8px;
+        }
+
+        .btn-copy {
+            width: 100%;
+            padding: 10px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-copy:hover {
+            background: #5558e3;
+        }
+
+        .lobby-players {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .joined-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--light-text);
+        }
+
+        .joined-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .joined-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            background: rgba(132, 204, 22, 0.1);
+            border: 1px solid var(--accent-lime);
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .btn-start {
+            padding: 16px 40px;
+            background: linear-gradient(135deg, var(--accent-lime), #84cc16);
+            color: #0f172a;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-start:hover {
+            transform: scale(1.02);
+            box-shadow: 0 12px 24px rgba(132, 204, 22, 0.3);
+        }
+
+        .btn-start:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-reset {
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid var(--dim-text);
+            color: var(--dim-text);
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 8px;
+        }
+
+        .btn-reset:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* ============ SCROLLBAR ============ */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #5558e3;
+        }
+
+        /* ============ TOAST ============ */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            z-index: 1001;
+            animation: slideInUp 0.3s ease;
+        }
+
+        /* ============ JOIN SCREEN STYLES ============ */
+        #joinScreen {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        #joinScreen.active {
+            display: flex;
+        }
+
+        #joinForm input {
+            transition: all 0.3s ease;
+        }
+
+        #joinForm input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        #joinForm button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 1024px) {
+            .host-content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .side-selector-box {
+                grid-template-columns: 1fr;
+            }
+
+            .host-header {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+
+            .host-status {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .player-view {
+                padding: 16px;
+            }
+
+            .player-container {
+                padding: 0;
+                gap: 12px;
+            }
+
+            .voting-box {
+                padding: 24px;
+            }
+
+            .vote-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Join Screen -->
+    <div class="side-selector" id="joinScreen">
+        <div class="side-selector-box">
+            <div style="max-width: 500px; width: 90%; margin: 0 auto;">
+                <div id="joinForm" style="background: var(--dark-card); border: 1px solid var(--dark-border); border-radius: 16px; padding: 40px; display: flex; flex-direction: column; gap: 24px; animation: slideInUp 0.5s ease;">
+                    <div style="text-align: center; font-size: 28px; font-weight: 800; background: linear-gradient(90deg, var(--accent-lime), var(--accent-sky)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Der Dümmste fliegt</div>
+                    <input type="text" id="playerNameInput" placeholder="Dein Name..." style="padding: 12px 16px; background: rgba(30, 41, 59, 0.5); border: 1px solid var(--dark-border); border-radius: 8px; color: var(--light-text); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px;" />
+                    <button onclick="joinGame()" style="padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">🚀 Beitreten</button>
+                    <button onclick="resetGame()" style="padding: 12px; background: transparent; border: 1px solid var(--dark-border); color: var(--dim-text); border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">← Zurück</button>
+                </div>
+                <div id="joinLoading" style="display: none; text-align: center; animation: slideInUp 0.5s ease;">
+                    <div class="waiting-spinner" style="margin: 0 auto; margin-bottom: 20px;"></div>
+                    <div style="color: var(--light-text); font-size: 18px; font-weight: 700;">Spieler werden geladen...</div>
+                </div>
+                <div id="joinError" style="display: none; background: var(--dark-card); border: 2px solid var(--danger); border-radius: 16px; padding: 40px; text-align: center; animation: slideInUp 0.5s ease;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+                    <div id="joinErrorMessage" style="color: var(--light-text); font-size: 18px; font-weight: 700; margin-bottom: 20px;">Fehler beim Beitreten</div>
+                    <button onclick="resetToJoinForm()" style="padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Erneut versuchen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Side Selector -->
+    <div class="side-selector active" id="sideSelector">
+        <div class="side-selector-box">
+            <button class="side-btn" onclick="startAsHost()">
+                <div class="side-icon">🖥️</div>
+                <div class="side-title">Host</div>
+                <div class="side-desc">Kontrolliere das Spiel, bewerte Antworten, verwalte Leben</div>
+            </button>
+            <button class="side-btn" onclick="startAsPlayer()">
+                <div class="side-icon">📱</div>
+                <div class="side-title">Player</div>
+                <div class="side-desc">Spieler-Ansicht, höre Fragen, stimme ab</div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Host View -->
+    <div class="host-view" id="hostView">
+        <div class="host-header">
+            <div class="host-title">Der Dümmste fliegt</div>
+            <div class="host-status">
+                <div class="badge" id="roomBadge">Room: <strong id="roomCode">PARTY</strong></div>
+                <div class="badge" id="roundBadge">Runde <strong id="currentRound">1</strong></div>
+                <div class="badge" id="questionBadge">Frage <strong id="currentQuestion">1</strong>/2</div>
+                <div class="badge" id="playerBadge">Spieler <strong id="playerIndex">1</strong>/<span id="playerCount">0</span></div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-reset" onclick="copyHostLink()" style="background: var(--primary); color: white; padding: 10px 16px;">📋 Link kopieren</button>
+                <button class="btn-reset" onclick="showEndGameModal()" style="background: var(--danger); color: white; padding: 10px 16px;">🛑 Beenden</button>
+            </div>
+        </div>
+        <div class="host-content">
+            <div class="main-card">
+                <div>
+                    <div class="card-label">Aktueller Spieler</div>
+                    <div class="player-name-display" id="hostPlayerName">Max</div>
+                </div>
+                <div>
+                    <div class="card-label">Frage</div>
+                    <div class="question-display" id="hostQuestionDisplay">Welcher Planet ist der größte?</div>
+                </div>
+                <div class="answer-section">
+                    <div class="card-label answer-label">✓ Korrekte Antwort</div>
+                    <div class="answer-text" id="hostAnswerDisplay">Jupiter</div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn-action btn-correct" onclick="hostMarkAnswer('correct')">✓ Richtig</button>
+                    <button class="btn-action btn-wrong" onclick="hostMarkAnswer('wrong')">✗ Falsch</button>
+                    <button class="btn-action btn-skip" onclick="hostMarkAnswer('skip')">⊘ Skip</button>
+                </div>
+            </div>
+            <div class="sidebar">
+                <div class="panel">
+                    <div class="panel-title">🎮 Spieler</div>
+                    <div class="players-list" id="hostPlayersList"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-title">📋 Verlauf</div>
+                    <div style="font-family: 'Space Mono', monospace; font-size: 11px; color: var(--dim-text); display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;" id="hostLiveLog"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Player View -->
+    <div class="player-view" id="playerView">
+        <div class="player-container">
+            <div class="player-header">
+                <div>
+                    <div class="room-info">Raum: <span id="playerRoomCode">PARTY</span></div>
+                    <div class="round-info">Runde <span id="playerRound">1</span> • Frage <span id="playerQuestionNum">1</span>/2</div>
+                </div>
+            </div>
+
+            <div class="question-card">
+                <div class="card-label">Frage</div>
+                <div class="question-title" id="playerQuestionDisplay">Welcher Planet ist der größte?</div>
+                <div class="hint-text">💬 Antworte über Voice/Discord</div>
+            </div>
+
+            <div style="text-align: center; padding: 20px; color: var(--dim-text); display: flex; align-items: center; justify-content: center; gap: 12px;" id="playerWaitingState">
+                <div class="waiting-spinner"></div>
+                <span>Host bewertet gerade...</span>
+            </div>
+
+            <div class="dashboard">
+                <div class="dashboard-title">Alle Spieler</div>
+                <div class="player-list" id="playerPlayersList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lobby Screen -->
+    <div class="lobby-screen" id="lobbyScreen">
+        <div class="lobby-content">
+            <div class="lobby-title">🎮 Der Dümmste fliegt</div>
+            <div class="lobby-subtitle">Warte auf mehr Spieler...</div>
+
+            <div class="link-section">
+                <div class="link-label">🔗 Spieler-Einladungslink (mit OTP)</div>
+                <div class="link-display" id="lobbyLink">https://example.com/join?name=Max&otp=abc123</div>
+                <button class="btn-copy" onclick="copyLink()">📋 Link kopieren</button>
+            </div>
+
+            <div class="lobby-players">
+                <div class="joined-title">Beigetretene Spieler (<span id="lobbyPlayerCount">0</span>)</div>
+                <div class="joined-list" id="lobbyPlayersList"></div>
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button class="btn-start" id="startBtn" onclick="startGame()" disabled>🚀 Spiel starten (min. 2)</button>
+                <button class="btn-reset" onclick="resetGame()">↻ Neu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Voting Overlay -->
+    <div class="voting-overlay" id="votingOverlay">
+        <div class="voting-box">
+            <div class="voting-title">🗳️ Wer war am dümmsten?</div>
+            <div class="voting-rules">Du darfst <strong>genau 1× pro Runde</strong> abstimmen.<br>Du kannst <strong>nicht für dich selbst</strong> stimmen.</div>
+            <div class="vote-cards" id="voteCandidates"></div>
+            <div class="voting-confirm">
+                <button class="btn-submit" id="submitVoteBtn" onclick="submitVote()" disabled>Abstimmung einreichen</button>
+                <button class="btn-cancel" onclick="cancelVoting()">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Elimination Overlay -->
+    <div class="elimination-overlay" id="eliminationOverlay">
+        <div class="elimination-box">
+            <div class="elimination-icon">💔</div>
+            <div class="elimination-title">Du bist raus!</div>
+            <div class="elimination-text">Du hast 0 Leben. Schau dir den Rest des Spiels an!</div>
+            <button class="btn-spectate" onclick="startSpectating()">👀 Zuschauen</button>
+        </div>
+    </div>
+
+    <!-- Estimation Overlay -->
+    <div class="estimation-overlay" id="estimationOverlay">
+        <div class="estimation-box">
+            <div class="estimation-icon">🎯</div>
+            <div class="estimation-title">Schätzspiel!</div>
+            <div class="elimination-text">Das Spiel wechselt jetzt ins Schätzspiel-Modus.<br><strong>Details folgen später</strong></div>
+            <button class="btn-spectate" onclick="closeEstimation()">OK</button>
+        </div>
+    </div>
+
+    <!-- Voting Confirmation Overlay -->
+    <div class="voting-overlay" id="votingConfirmationOverlay">
+        <div class="voting-box" style="max-width: 400px;">
+            <div style="font-size: 48px; text-align: center; margin-bottom: 16px;">✓</div>
+            <div class="voting-title">Stimme gespeichert!</div>
+            <div style="text-align: center; color: var(--dim-text); font-size: 14px; margin: 16px 0;">Warte auf andere Spieler…</div>
+            <div class="waiting-spinner" style="margin: 0 auto;"></div>
+        </div>
+    </div>
+
+    <!-- End Game Confirmation Modal -->
+    <div class="voting-overlay" id="endGameModal">
+        <div class="voting-box" style="max-width: 400px;">
+            <div class="voting-title">Spiel beenden?</div>
+            <div style="text-align: center; color: var(--dim-text); font-size: 14px; margin: 16px 0;">Wirklich abbrechen? Alle Daten gehen verloren.</div>
+            <div class="voting-confirm">
+                <button class="btn-submit" style="background: var(--danger);" onclick="confirmEndGame()">Ja, beenden</button>
+                <button class="btn-cancel" onclick="cancelEndGame()">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ GAME STATE ============
+        const gameState = {
+            mode: null, // 'host' or 'player'
+            roomCode: 'PARTY',
+            currentRound: 1,
+            questionInRound: 1,
+            currentPlayerIndex: 0,
+            currentPlayerName: null,
+            gamePhase: 'lobby', // lobby, game, voting, estimation, ended
+            selectedVote: null,
+            hasVoted: false,
+            spectating: false,
+
+            players: [
+                { name: 'Max', lives: 3, eliminated: false },
+                { name: 'Lisa', lives: 3, eliminated: false },
+                { name: 'Tom', lives: 3, eliminated: false }
+            ],
+
+            questions: [
+                { q: 'Welcher Planet ist der größte in unserem Sonnensystem?', a: 'Jupiter' },
+                { q: 'Wie viele Kontinente gibt es?', a: '7' },
+                { q: 'Welcher Fluss ist der längste in Afrika?', a: 'Nil' },
+                { q: 'In welchem Jahr fiel die Berliner Mauer?', a: '1989' },
+                { q: 'Wie viele Seiten hat ein Würfel?', a: '6' },
+                { q: 'Welche Farbe hat ein Smaragd?', a: 'Grün' }
+            ],
+
+            usedQuestions: new Set(),
+            currentQuestion: null,
+            votes: {},
+            eventLog: []
+        };
+
+        // ============ GAME INITIALIZATION ============
+        function startAsHost() {
+            gameState.mode = 'host';
+            showScreen('lobbyScreen');
+            document.getElementById('sideSelector').classList.remove('active');
+            updateLobby();
+        }
+
+        function startAsPlayer() {
+            gameState.mode = 'player';
+            document.getElementById('sideSelector').classList.remove('active');
+            document.getElementById('joinScreen').classList.add('active');
+            document.getElementById('playerNameInput').focus();
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.side-selector, .host-view, .player-view, .lobby-screen').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // ============ LOBBY ============
+        function updateLobby() {
+            const activePlayers = gameState.players.filter(p => !p.eliminated);
+            document.getElementById('lobbyPlayerCount').textContent = activePlayers.length;
+            document.getElementById('playerCount').textContent = gameState.players.length;
+            document.getElementById('startBtn').disabled = activePlayers.length < 2;
+
+            const list = document.getElementById('lobbyPlayersList');
+            list.innerHTML = activePlayers.map((p, i) => `
+                <div class="joined-item">
+                    <div class="avatar">${p.name[0]}</div>
+                    <div>${p.name}</div>
+                </div>
+            `).join('');
+        }
+
+        function copyLink() {
+            const link = `https://party-game.local/join?name=Player&otp=xyz789abc`;
+            navigator.clipboard.writeText(link);
+            showToast('Link kopiert!');
+        }
+
+        function startGame() {
+            if (gameState.players.filter(p => !p.eliminated).length < 2) return;
+            gameState.gamePhase = 'game';
+            gameState.currentRound = 1;
+            gameState.questionInRound = 1;
+            gameState.currentPlayerIndex = 0;
+
+            if (gameState.mode === 'host') {
+                showScreen('hostView');
+            } else {
+                showScreen('playerView');
+            }
+
+            nextQuestion();
+        }
+
+        // ============ GAME LOGIC ============
+        function nextQuestion() {
+            if (gameState.questionInRound > 2) {
+                // Round end - voting
+                gameState.gamePhase = 'voting';
+                if (gameState.mode === 'player') {
+                    showVotingScreen();
+                }
+                return;
+            }
+
+            // Get random question
+            let questionIndex;
+            do {
+                questionIndex = Math.floor(Math.random() * gameState.questions.length);
+            } while (gameState.usedQuestions.has(questionIndex));
+            gameState.usedQuestions.add(questionIndex);
+
+            gameState.currentQuestion = gameState.questions[questionIndex];
+
+            updateHostView();
+            updatePlayerView();
+        }
+
+        function hostMarkAnswer(result) {
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            const question = gameState.currentQuestion?.q || '...';
+            let lifeDelta = 0;
+
+            if (result === 'wrong' && !currentPlayer.eliminated) {
+                currentPlayer.lives--;
+                lifeDelta = -1;
+                if (currentPlayer.lives <= 0) {
+                    currentPlayer.lives = 0;
+                    currentPlayer.eliminated = true;
+                    if (gameState.mode === 'player') {
+                        showElimination();
+                    }
+                }
+            } else if (result === 'skip') {
+                gameState.currentQuestion = null;
+                appendLog(currentPlayer.name, question, 'skip', 0);
+                nextQuestion();
+                return;
+            }
+
+            appendLog(currentPlayer.name, question, result, lifeDelta);
+            showToast(`${result.toUpperCase()}: ${currentPlayer.name} (${currentPlayer.lives} ❤️)`);
+
+            gameState.currentPlayerIndex++;
+            if (gameState.currentPlayerIndex >= gameState.players.length) {
+                gameState.currentPlayerIndex = 0;
+                gameState.questionInRound++;
+            }
+
+            nextQuestion();
+        }
+
+        // ============ VOTING ============
+        function showVotingScreen() {
+            gameState.selectedVote = null;
+            document.getElementById('submitVoteBtn').disabled = true;
+
+            const candidates = gameState.players
+                .filter(p => !p.eliminated && p.name !== gameState.currentPlayerName)
+                .map((p, i) => `
+                    <button class="vote-card" onclick="selectVote('${p.name}', this)">
+                        <div>${p.name}</div>
+                        <div style="font-size: 11px; color: var(--dim-text); margin-top: 4px;">${p.lives}❤️</div>
+                    </button>
+                `).join('');
+
+            document.getElementById('voteCandidates').innerHTML = candidates;
+            document.getElementById('votingOverlay').classList.add('active');
+        }
+
+        function selectVote(name, element) {
+            document.querySelectorAll('.vote-card').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            gameState.selectedVote = name;
+            document.getElementById('submitVoteBtn').disabled = false;
+        }
+
+        function submitVote() {
+            if (gameState.hasVoted || !gameState.selectedVote) return;
+
+            gameState.votes[gameState.selectedVote] = (gameState.votes[gameState.selectedVote] || 0) + 1;
+            gameState.hasVoted = true;
+
+            closeVoting();
+            document.getElementById('votingConfirmationOverlay').classList.add('active');
+
+            setTimeout(() => {
+                processVotes();
+            }, 2000);
+        }
+
+        function closeVoting() {
+            document.getElementById('votingOverlay').classList.remove('active');
+        }
+
+        function cancelVoting() {
+            closeVoting();
+        }
+
+        function processVotes() {
+            document.getElementById('votingConfirmationOverlay').classList.remove('active');
+
+            if (Object.keys(gameState.votes).length === 0) {
+                nextRound();
+                return;
+            }
+
+            let maxVotes = 0;
+            let topPlayers = [];
+            for (let [name, votes] of Object.entries(gameState.votes)) {
+                if (votes > maxVotes) {
+                    maxVotes = votes;
+                    topPlayers = [name];
+                } else if (votes === maxVotes) {
+                    topPlayers.push(name);
+                }
+            }
+
+            if (topPlayers.length === 1) {
+                const player = gameState.players.find(p => p.name === topPlayers[0]);
+                if (player) {
+                    player.lives--;
+                    if (player.lives <= 0) {
+                        player.lives = 0;
+                        player.eliminated = true;
+                    }
+                    showToast(`${player.name} verliert 1 Leben (${player.lives} übrig)`);
+                }
+            } else {
+                topPlayers.forEach(name => {
+                    const player = gameState.players.find(p => p.name === name);
+                    if (player) {
+                        player.lives--;
+                        if (player.lives <= 0) {
+                            player.lives = 0;
+                            player.eliminated = true;
+                        }
+                    }
+                });
+                showToast(`Gleichstand! ${topPlayers.join(', ')} verlieren je 1 Leben`);
+            }
+
+            const activePlayers = gameState.players.filter(p => !p.eliminated);
+            if (activePlayers.length <= 2) {
+                gameState.gamePhase = 'estimation';
+                document.getElementById('estimationOverlay').classList.add('active');
+            } else {
+                nextRound();
+            }
+        }
+
+        function nextRound() {
+            gameState.currentRound++;
+            gameState.questionInRound = 1;
+            gameState.currentPlayerIndex = 0;
+            gameState.votes = {};
+            gameState.hasVoted = false;
+            gameState.selectedVote = null;
+
+            if (gameState.players.filter(p => !p.eliminated).length < 2) {
+                gameState.gamePhase = 'ended';
+                showToast('🎉 Spiel vorbei!');
+                resetGame();
+            } else {
+                gameState.gamePhase = 'game';
+                nextQuestion();
+            }
+        }
+
+        // ============ VIEW UPDATES ============
+        function updateHostView() {
+            const player = gameState.players[gameState.currentPlayerIndex];
+            if (!player) return;
+
+            document.getElementById('hostPlayerName').textContent = player.name;
+            document.getElementById('hostQuestionDisplay').textContent = gameState.currentQuestion?.q || '...';
+            document.getElementById('hostAnswerDisplay').textContent = gameState.currentQuestion?.a || '...';
+            document.getElementById('currentRound').textContent = gameState.currentRound;
+            document.getElementById('currentQuestion').textContent = gameState.questionInRound;
+            document.getElementById('playerIndex').textContent = gameState.currentPlayerIndex + 1;
+
+            const activePlayers = gameState.players.filter(p => !p.eliminated);
+            document.getElementById('playerCount').textContent = activePlayers.length;
+
+            const list = document.getElementById('hostPlayersList');
+            list.innerHTML = gameState.players.map(p => `
+                <div class="player-item ${p.eliminated ? 'eliminated' : ''}">
+                    <div class="player-name">${p.name}</div>
+                    <div class="hearts">
+                        ${Array(3).fill(0).map((_, i) => `<span class="heart ${i >= p.lives ? 'empty' : ''}">❤️</span>`).join('')}
+                    </div>
+                    <div class="life-controls">
+                        <button class="btn-life" onclick="adjustLife('${p.name}', 1)">+</button>
+                        <button class="btn-life" onclick="adjustLife('${p.name}', -1)">−</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updatePlayerView() {
+            document.getElementById('playerRoomCode').textContent = gameState.roomCode;
+            document.getElementById('playerRound').textContent = gameState.currentRound;
+            document.getElementById('playerQuestionNum').textContent = gameState.questionInRound;
+            document.getElementById('playerQuestionDisplay').textContent = gameState.currentQuestion?.q || '...';
+
+            const list = document.getElementById('playerPlayersList');
+            list.innerHTML = gameState.players.map(p => `
+                <div class="player-row ${p.name === gameState.currentPlayerName ? 'self' : ''} ${p.eliminated ? 'eliminated' : ''}">
+                    <div>${p.name}</div>
+                    <div class="hearts">
+                        ${Array(3).fill(0).map((_, i) => `<span class="heart ${i >= p.lives ? 'empty' : ''}">❤️</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function adjustLife(playerName, change) {
+            const player = gameState.players.find(p => p.name === playerName);
+            if (player) {
+                player.lives = Math.max(0, Math.min(3, player.lives + change));
+                updateHostView();
+            }
+        }
+
+        function showElimination() {
+            document.getElementById('eliminationOverlay').classList.add('active');
+        }
+
+        function startSpectating() {
+            gameState.spectating = true;
+            document.getElementById('eliminationOverlay').classList.remove('active');
+        }
+
+        function closeEstimation() {
+            document.getElementById('estimationOverlay').classList.remove('active');
+        }
+
+        function simulatePlayerJoin() {
+            const playerNames = ['Max', 'Lisa', 'Tom'];
+            gameState.players = playerNames.map(name => ({
+                name: name,
+                lives: 3,
+                eliminated: false
+            }));
+            updateLobby();
+        }
+
+        function resetGame() {
+            gameState.mode = null;
+            gameState.currentRound = 1;
+            gameState.questionInRound = 1;
+            gameState.currentPlayerIndex = 0;
+            gameState.currentPlayerName = null;
+            gameState.gamePhase = 'lobby';
+            gameState.players = gameState.players.map(p => ({ ...p, lives: 3, eliminated: false }));
+            gameState.usedQuestions.clear();
+            gameState.votes = {};
+            gameState.hasVoted = false;
+            gameState.selectedVote = null;
+            gameState.eventLog = [];
+
+            document.getElementById('sideSelector').classList.add('active');
+            document.getElementById('joinScreen').classList.remove('active');
+            showScreen('sideSelector');
+            document.querySelectorAll('.voting-overlay, .elimination-overlay, .estimation-overlay, .endGameModal, .votingConfirmationOverlay').forEach(el => {
+                el.classList.remove('active');
+            });
+        }
+
+        // ============ JOIN SCREEN ============
+        function joinGame() {
+            const name = document.getElementById('playerNameInput').value.trim();
+            if (!name) {
+                showToast('Bitte gib einen Namen ein!');
+                return;
+            }
+
+            if (gameState.players.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+                showJoinError('Name bereits vergeben');
+                return;
+            }
+
+            gameState.currentPlayerName = name;
+            simulateJoinLoading();
+        }
+
+        function simulateJoinLoading() {
+            document.getElementById('joinForm').style.display = 'none';
+            document.getElementById('joinLoading').style.display = 'block';
+
+            setTimeout(() => {
+                document.getElementById('joinLoading').style.display = 'none';
+                document.getElementById('joinScreen').classList.remove('active');
+                updateLobby();
+                showScreen('lobbyScreen');
+            }, 1500);
+        }
+
+        function showJoinError(message) {
+            document.getElementById('joinForm').style.display = 'none';
+            document.getElementById('joinErrorMessage').textContent = message;
+            document.getElementById('joinError').style.display = 'block';
+        }
+
+        function resetToJoinForm() {
+            document.getElementById('joinError').style.display = 'none';
+            document.getElementById('joinForm').style.display = 'block';
+            document.getElementById('playerNameInput').value = '';
+            document.getElementById('playerNameInput').focus();
+        }
+
+        // ============ HOST CONTROLS ============
+        function copyHostLink() {
+            const link = `https://party-game.local/join?otp=xyz789abc`;
+            navigator.clipboard.writeText(link);
+            showToast('Link kopiert!');
+        }
+
+        function showEndGameModal() {
+            document.getElementById('endGameModal').classList.add('active');
+        }
+
+        function cancelEndGame() {
+            document.getElementById('endGameModal').classList.remove('active');
+        }
+
+        function confirmEndGame() {
+            document.getElementById('endGameModal').classList.remove('active');
+            resetGame();
+        }
+
+        // ============ LIVE LOG ============
+        function appendLog(playerName, question, result, lifeDelta) {
+            const now = new Date();
+            const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            const shortQ = question.length > 30 ? question.substring(0, 27) + '...' : question;
+            const resultIcon = result === 'correct' ? '✓' : result === 'wrong' ? '✗' : '⊘';
+            const lifeText = lifeDelta !== 0 ? ` [${lifeDelta > 0 ? '+' : ''}${lifeDelta}❤️]` : '';
+
+            const logEntry = `[${time}] ${playerName} "${shortQ}" ${resultIcon}${lifeText}`;
+            gameState.eventLog.unshift(logEntry);
+
+            const logEl = document.getElementById('hostLiveLog');
+            if (logEl) {
+                logEl.innerHTML = gameState.eventLog.slice(0, 50).map(entry => `<div>${entry}</div>`).join('');
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+
+        // Initialize
+        updateLobby();
+    </script>
+</body>
+</html>
